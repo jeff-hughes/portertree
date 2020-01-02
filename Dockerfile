@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx:python3.6-alpine3.8
+FROM tiangolo/uwsgi-nginx:python3.7 as base
 
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
@@ -15,10 +15,6 @@ ENV STATIC_PATH /app/static
 # ENV STATIC_INDEX 1
 ENV STATIC_INDEX 0
 
-# Add demo app
-COPY ./app /app
-WORKDIR /app
-
 # Make /app/* available to be imported by Python globally to better support several use cases like Alembic migrations.
 ENV PYTHONPATH=/app
 
@@ -34,3 +30,15 @@ ENTRYPOINT ["/entrypoint.sh"]
 # It will check for an /app/prestart.sh script (e.g. for migrations)
 # And then will start Supervisor, which in turn will start Nginx and uWSGI
 CMD ["/start.sh"]
+
+
+# Development image
+FROM base as dev
+# empty at the moment -- use bind mounts at runtime to add app files
+
+
+# Production image
+FROM base as prod
+# Add demo app
+COPY ./app /app
+WORKDIR /app
