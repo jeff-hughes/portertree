@@ -18,6 +18,19 @@ ENV STATIC_INDEX 0
 # Make /app/* available to be imported by Python globally to better support several use cases like Alembic migrations.
 ENV PYTHONPATH=/app
 
+
+# Development image
+FROM base as dev
+
+# For the dev image, we are just using Flask's built-in development server
+CMD ["python", "main.py"]
+
+
+
+
+# Production image
+FROM base as prod
+
 # Move the base entrypoint to reuse it
 RUN mv /entrypoint.sh /uwsgi-nginx-entrypoint.sh
 # Copy the entrypoint that will generate Nginx additional configs
@@ -26,19 +39,12 @@ RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+# Add demo app
+COPY ./app /app
+WORKDIR /app
+
 # Run the start script provided by the parent image tiangolo/uwsgi-nginx.
 # It will check for an /app/prestart.sh script (e.g. for migrations)
 # And then will start Supervisor, which in turn will start Nginx and uWSGI
 CMD ["/start.sh"]
 
-
-# Development image
-FROM base as dev
-# empty at the moment -- use bind mounts at runtime to add app files
-
-
-# Production image
-FROM base as prod
-# Add demo app
-COPY ./app /app
-WORKDIR /app
