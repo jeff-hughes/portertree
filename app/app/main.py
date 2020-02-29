@@ -1,10 +1,9 @@
 import os
-import json
 
 from py2neo import Graph, NodeMatcher
 
 #from app import app
-from flask import Flask, Response
+from flask import Flask, render_template
 app = Flask(__name__)
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -76,6 +75,8 @@ def person_page(pid):
     data = {}
     p = matcher.match("Person", id=pid).first()
     data["focus"] = dict(p)
+    data["focus"]["display_name"] = create_display_name(p)
+    data["focus"]["life_span"] = create_life_span(p)
 
     # get info on focal person's parents
     data["parents"] = []
@@ -83,6 +84,8 @@ def person_page(pid):
     for pr in parents:
         graph.pull(pr.start_node)
         pr_dict = dict(pr.start_node)
+        pr_dict["display_name"] = create_display_name(pr.start_node)
+        pr_dict["life_span"] = create_life_span(pr.start_node)
 
         # get info on focal person's siblings
         # TODO: this currently will end up duplicating all the full
@@ -92,7 +95,10 @@ def person_page(pid):
         pr_children = graph.match((pr.start_node, ), r_type="PARENT_OF")
         for prc in pr_children:
             graph.pull(prc.end_node)
-            pr_dict["children"].append(dict(prc.end_node))
+            prc_dict = dict(prc.end_node)
+            prc_dict["display_name"] = create_display_name(prc.end_node)
+            prc_dict["life_span"] = create_life_span(prc.start_node)
+            pr_dict["children"].append(prc_dict)
         pr_dict["children"] = sorted(pr_dict["children"],
             key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
         data["parents"].append(pr_dict)
@@ -103,20 +109,24 @@ def person_page(pid):
     spouses = graph.match(set((p, )), r_type="MARRIED_TO")
     for s in spouses:
         graph.pull(s.end_node)
-        data["spouses"].append(dict(s.end_node))
+        s_dict = dict(s.end_node)
+        s_dict["display_name"] = create_display_name(s.end_node)
+        s_dict["life_span"] = create_life_span(s.start_node)
+        data["spouses"].append(s_dict)
 
     # get info on focal person's children
     data["children"] = []
     children = graph.match((p, ), r_type="PARENT_OF")
     for c in children:
         graph.pull(c.end_node)
-        data["children"].append(dict(c.end_node))
+        c_dict = dict(c.end_node)
+        c_dict["display_name"] = create_display_name(c.end_node)
+        c_dict["life_span"] = create_life_span(c.start_node)
+        data["children"].append(c_dict)
     data["children"] = sorted(data["children"],
-        key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
+        key=lambda k: k["birth_order"] if "birth_order" in k else 1000000)
 
-    resp = Response(json.dumps(data))
-    resp.headers['Content-Type'] = 'application/json'
-    return resp 
+    return render_template("person.html", data=data)
 
 
 # Helper functions
@@ -159,6 +169,48 @@ def birthdate_sorter(record):
             except ValueError:
                 day = 1000000  # sort to end
     return (year, month, day)
+
+def create_display_name(record):
+    name = ""
+    if is_attr(record, "first_name"):
+        if record["first_name"] == "Unnamed":
+            return record["first_name"]
+        name += record["first_name"]
+    else:
+        name += "_____"
+    if is_attr(record, "nickname"):
+        name += f" ({record['nickname']})"
+    if is_attr(record, "middle_name1"):
+        if record["pref_name"] == "M1":
+            name += f" <u>{record['middle_name1']}</u>"
+        else:
+            name += " " + record['middle_name1']
+    if is_attr(record, "middle_name2"):
+        if record["pref_name"] == "M2":
+            name += f" <u>{record['middle_name2']}</u>"
+        else:
+            name += " " + record['middle_name2']
+    if is_attr(record, "last_name"):
+        name += " " + record["last_name"]
+    else:
+        name += " _____"
+    return name
+
+def create_life_span(record):
+    string = ""
+    if is_attr(record, "birth_year"):
+        string += f" ({record['birth_year']}"
+    else:
+        string += " (? "
+
+    if is_attr(record, "death_year"):
+        string += f" - {record['death_year']})"
+    elif is_attr(record, "birth_year") and int(record["birth_year"]) >= (2019-100):
+        string += " - present)"
+        # assume the best if someone is less than 100 years old :)
+    else:
+        string += " - ?)"
+    return string
 
 
 if __name__ == "__main__":
