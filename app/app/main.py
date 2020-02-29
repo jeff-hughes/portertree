@@ -4,19 +4,15 @@ import json
 from py2neo import Graph, NodeMatcher
 
 #from app import app
-from flask import Flask
+from flask import Flask, Response
 app = Flask(__name__)
+
+MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December"]
 
 graph = Graph(host='neo4j', auth=(os.environ["NEO4J_USERNAME"],
                                   os.environ["NEO4J_PASSWORD"]))
 matcher = NodeMatcher(graph)
-
-
-def is_attr(record, attr):
-    if attr in record and record[attr] is not None:
-        return True
-    else:
-        return False
 
 
 @app.route('/')
@@ -79,23 +75,90 @@ def index():
 def person_page(pid):
     data = {}
     p = matcher.match("Person", id=pid).first()
-    data["centre"] = dict(p)
+    data["focus"] = dict(p)
 
+    # get info on focal person's parents
     data["parents"] = []
     parents = graph.match((None, p), r_type="PARENT_OF")
     for pr in parents:
-        data["parents"].append(dict(pr.start_node))
-    data["parents"] = sorted(data["parents"],
-        key=lambda k: k['birth_year'] if 'birth_year' in k else 1000000)
+        graph.pull(pr.start_node)
+        pr_dict = dict(pr.start_node)
 
+        # get info on focal person's siblings
+        # TODO: this currently will end up duplicating all the full
+        # siblings (half-siblings will only appear once); maybe there's
+        # a more efficient way to create this list
+        pr_dict["children"] = []
+        pr_children = graph.match((pr.start_node, ), r_type="PARENT_OF")
+        for prc in pr_children:
+            graph.pull(prc.end_node)
+            pr_dict["children"].append(dict(prc.end_node))
+        pr_dict["children"] = sorted(pr_dict["children"],
+            key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
+        data["parents"].append(pr_dict)
+    data["parents"] = sorted(data["parents"], key=birthdate_sorter)
+
+    # get info on focal person's spouse(s)
+    data["spouses"] = []
+    spouses = graph.match(set((p, )), r_type="MARRIED_TO")
+    for s in spouses:
+        graph.pull(s.end_node)
+        data["spouses"].append(dict(s.end_node))
+
+    # get info on focal person's children
     data["children"] = []
     children = graph.match((p, ), r_type="PARENT_OF")
     for c in children:
+        graph.pull(c.end_node)
         data["children"].append(dict(c.end_node))
     data["children"] = sorted(data["children"],
         key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
 
-    return json.dumps(data)
+    resp = Response(json.dumps(data))
+    resp.headers['Content-Type'] = 'application/json'
+    return resp 
+
+
+# Helper functions
+
+def is_attr(record, attr):
+    if attr in record and record[attr] is not None:
+        return True
+    else:
+        return False
+
+def birthdate_sorter(record):
+    """Function for use in sorted(), to sort birthdates in chronological
+    order. Returns a tuple of (year, month, day).
+    """
+    year, month, day = (None, None, None)
+    if "birth_year" in record and record["birth_year"] is not None:
+        try:
+            # if year is integer, great
+            year = int(record["birth_year"])
+        except ValueError:
+            try:
+                # this should handle cases like "1945?" and
+                # "1945 or 1946"
+                year = int(record["birth_year"][0:4])
+            except ValueError:
+                year = 1000000  # sort to end
+
+    if "birth_month" in record and record["birth_month"] is not None:
+        try:
+            month = MONTHS.index(record["birth_month"]) + 1
+        except ValueError:
+            month = 1000000  # sort to end
+    
+    if "birth_day" in record and record["birth_day"] is not None:
+        try:
+            day = int(record["birth_day"])
+        except ValueError:
+            try:
+                day = int(record["birth_day"][0:2])
+            except ValueError:
+                day = 1000000  # sort to end
+    return (year, month, day)
 
 
 if __name__ == "__main__":
