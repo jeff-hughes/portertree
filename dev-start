@@ -1,4 +1,0 @@
-#!/bin/bash
-docker image build --target dev -t jeffhughes22/uwsgi-nginx-flask:python3.7 .
-docker container run --name flask -d -p 80:80 --mount type=bind,source="$(pwd)/app",target=/app jeffhughes22/uwsgi-nginx-flask:python3.7
-

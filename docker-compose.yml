@@ -1,0 +1,44 @@
+version: '3.5'
+
+services:
+    db:
+        build: ./db
+        container_name: neo4j
+        restart: always
+        ports:
+            - 7474:7474
+            - 7687:7687
+        volumes:
+            - neo4j-data:/data
+            - neo4j-logs:/logs
+        env_file: .env
+        networks:
+            - porterapp
+
+    app:
+        build:
+            context: ./app
+            target: dev
+        container_name: porterapp
+        restart: always
+        ports:
+            - 80:80
+        volumes:
+            - ./app/app:/app
+        env_file: .env
+        depends_on:
+            - db
+        networks:
+            - porterapp
+
+volumes:
+    neo4j-data:
+    neo4j-logs:
+
+networks:
+    porterapp:
+
+# .env file needs to contain:
+# NEO4J_USERNAME=aaaaa
+# NEO4J_PASSWORD=bbbbb
+# NEO4J_AUTH=aaaaa/bbbbb
