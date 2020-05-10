@@ -1,41 +1,40 @@
-<html>
-    <head>
-        <title>Porter Family Tree</title>
-    </head>
-    <body>
-        <h2>{{ data.focus.display_name | safe }} {{ data.focus.life_span }}</h2>
-        <dl>
-            <dt>Birth: </dt><dd>{{ data.focus.birth_month or '?' }} {{ data.focus.birth_day or '?' }}, {{ data.focus.birth_year or '?' }}{% if data.focus.birth_place %}; {{ data.focus.birth_place }}{% endif %}</dd>
-            {% if data.focus.death_month is not undefined or data.focus.death_day is not undefined or data.focus.death_year is not undefined or data.focus.death_place is not undefined %}
-                <dt>Death: </dt><dd>{{ data.focus.death_month or '?' }} {{ data.focus.death_day or '?' }}, {{ data.focus.death_year or '?' }}{% if data.focus.death_place %}; {{ data.focus.death_place }}{% endif %}</dd>
-            {% endif %}
-            {% if data.focus.buried %}<dt>Buried: </dt><dd>{{ data.focus.buried }}</dd>{% endif %}
-            {% if data.focus.additional_notes %}<dt>Notes: </dt><dd>{{ data.focus.additional_notes }}</dd>{% endif %}
-        </dl>
+{% extends "base.html" %}
 
-        <h3>Parents</h3>
-        {% if data.parents | length > 0 %}
-            <ul>
-                {% for p in data.parents %} 
-                    <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }}</a></li> 
-                {% endfor %}
-            </ul>
+{% block title %}{{ data.focus.display_name | safe }}{% endblock %}
+
+{% block content %}
+    <h2>{{ data.focus.display_name | safe }} {{ data.focus.life_span }}</h2>
+    <dl>
+        <dt>Birth: </dt><dd>{{ data.focus.birth_month or '?' }} {{ data.focus.birth_day or '?' }}, {{ data.focus.birth_year or '?' }}{% if data.focus.birth_place %}; {{ data.focus.birth_place }}{% endif %}</dd>
+        {% if data.focus.death_month is not undefined or data.focus.death_day is not undefined or data.focus.death_year is not undefined or data.focus.death_place is not undefined %}
+            <dt>Death: </dt><dd>{{ data.focus.death_month or '?' }} {{ data.focus.death_day or '?' }}, {{ data.focus.death_year or '?' }}{% if data.focus.death_place %}; {{ data.focus.death_place }}{% endif %}</dd>
         {% endif %}
-        <h3>Spouses</h3>
-        {% if data.spouses | length > 0 %}
-            <ul>
-                {% for s in data.spouses %} 
-                    <li><a href="{{ url_for('person_page', pid=s.id) }}">{{ s.display_name | safe }}</a></li> 
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <h3>Children</h3>
-        {% if data.children | length > 0 %}
-            <ul>
-                {% for c in data.children %} 
-                    <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }}</a></li> 
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </body>
-</html>
+        {% if data.focus.buried %}<dt>Buried: </dt><dd>{{ data.focus.buried }}</dd>{% endif %}
+        {% if data.focus.additional_notes %}<dt>Notes: </dt><dd>{{ data.focus.additional_notes }}</dd>{% endif %}
+    </dl>
+
+    <h3>Parents</h3>
+    {% if data.parents | length > 0 %}
+        <ul>
+            {% for p in data.parents %} 
+                <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }}</a></li> 
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <h3>Spouses</h3>
+    {% if data.spouses | length > 0 %}
+        <ul>
+            {% for s in data.spouses %} 
+                <li><a href="{{ url_for('person_page', pid=s.id) }}">{{ s.display_name | safe }}</a></li> 
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <h3>Children</h3>
+    {% if data.children | length > 0 %}
+        <ul>
+            {% for c in data.children %} 
+                <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }}</a></li> 
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

@@ -150,7 +150,12 @@ def person_page(pid):
     data["children"] = sorted(data["children"],
         key=lambda k: k["birth_order"] if "birth_order" in k else 1000000)
 
-    return render_template("person.html", data=data)
+    # special cases with extended notes about the early family members
+    extended = ["1", "1.1", "1.2", "1.3"]
+    if data["focus"]["id"] in extended:
+        return render_template(f"extended/person{data['focus']['id']}.html", data=data)
+    else:
+        return render_template("person.html", data=data)
 
 
 # Helper functions
@@ -229,7 +234,7 @@ def create_life_span(record):
 
     if is_attr(record, "death_year"):
         string += f" - {record['death_year']})"
-    elif is_attr(record, "birth_year") and int(record["birth_year"]) >= (2019-100):
+    elif is_attr(record, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (2019-100):
         string += " - present)"
         # assume the best if someone is less than 100 years old :)
     else:

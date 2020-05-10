@@ -1,0 +1,42 @@
+{% extends "person.html" %}
+
+{% block content %}
+    {{ super() }}
+
+    <p>David was the oldest son of <a href="{{ url_for('person_page', pid='1') }}">William</a> and <a href="{{ url_for('person_page', pid='1a') }}">Elizabeth (Kenney) Porter</a>. He and his brother <a href="{{ url_for('person_page', pid='1.2') }}">Thomas</a> drew bricks for their family home on the homestead, Lot 16, Concession 10. They got bricks from two kilns at Lot 15, Concession 10 (Snider&rsquo;s Corners &ndash; now Bethesda) and at Lot 17, Concession 6. These kilns were operated by James Lowe. <a href="#note1">(Note 1)</a></p>
+
+    <p><a href="{{ url_for('person_page', pid='1.1a') }}">Georgina&rsquo;s</a> parents were William and Ellen (Eleanor) Nesbitt Kerr, both from the Oshawa area. They married and moved to Meaford, settling in a log house on the 11th Concession near the Big Head River (about 5 miles from Meaford). Mrs. Kerr was 17 when she married and died in 1939 at 101 years. Both Mr. &amp; Mrs. Kerr are buried in Lakeview Cemetery. Some of their children were Georgina Maria, Olive and Harry.</p>
+    
+    <p>David and Georgina Porter bought a 200 acre farm, Lot 18, Concession 11, St. Vincent Township in 1885. The farm was called Bayview. (This corner is still referred to as Bayview today.) David left the farm to his wife in his will.</p>
+    
+    <p>Before David died, a man by the name of Alfred Jeffrey (born 1882) came to Canada from England on a sight-seeing trip. Mr. Jeffrey learned of David&rsquo;s illness, and, although he was not a farmer, he agreed to help the family. He stayed over five years. He married Olive Kerr (a sister of Georgina) and they moved to Calgary, Alberta.</p>
+    
+    <p>After David&rsquo;s death, Georgina rented the farm out, as she felt it was too much responsibility for her children, and moved to Meaford, Ontario to 142 St. Vincent Street.</p>
+    
+    <p>In 1936, 0.054 acres was taken off the front edge of the farm for widening of the highway. In 1942, Georgina Porter sold the farm to Mr. Elmer Scarrow. (This farm was in the Porter name for 57 years.)</p>
+    
+    <p>All the children attended St. John&rsquo;s School at Lot 16, Concession 11. After Georgina moved to Meaford, the children attended Meaford Public School and Meaford High School.</p>
+    
+    <p>David and Georgina&rsquo;s <a href="{{ url_for('person_page', pid='1.1.1') }}">first child</a>, a son, died at birth and was buried on their farm, as this was permissible in those days.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1.2') }}">Karl William Porter</a> was born on his parents&rsquo; farm (Lot 18, Concession 11) in 1896. He went west by train in 1913 when he was 17 to live with his Uncle Harry Kerr on their ranch in Medicine Hat, Alberta. He stayed there for several years, then started farming on his own. His sister <a href="{{ url_for('person_page', pid='1.1.6') }}">Mary</a> notes that he loved the farm, and especially his animals.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1.3') }}">Bernice</a>, born in 1898 on the farm (Lot 18, Concession 11) was not too well in health and lived with her grandparents, William and Ellen Nesbitt Kerr, in Meaford, Ontario. She went west to visit Alfred and Olive Jeffrey in Calgary on her first holidays in about 1916. There she got a job with the Alberta Government Telephones as a telephone operator and stayed out west. In Vulcan, Alberta, Bernice met <a href="{{ url_for('person_page', pid='1.1.3a') }}">William Herman</a>, who had a dray and taxi business there. They married and were dairy farmers in Vulcan, Alberta area, then moved to Black Diamond, Alberta to operate a dairy.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1.4') }}">John (Jack) Porter</a> was born on the farm in 1900. He went to Medicine Hat, Alberta by train in 1916 to live with his Uncle Harry Kerr. He spent some time as a time keeper in a mine in British Columbia, then a grain buyer in Fort Saskatchewan, Alberta. He was a member of the United Church and the Masonic Lodge.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1.5') }}">Georgina (Jean) Porter</a> was born on the farm in 1902 and attended St. John&rsquo;s School, Meaford Public School, Meaford High School and Owen Sound Business College.</p>
+    
+    <p>She worked for a while as a bookkeeper at a men&rsquo;s furnishings store in Owen Sound, then moved to Detroit, Michigan and later to Newark, New Jersey. She was self-employed, selling ladies&rsquo;, men&rsquo;s and children&rsquo;s ready-to-wear clothing.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1.6') }}">Mary</a> was born in 1904 at Bayview, attended St. John&rsquo;s School for a short time with <a href="{{ url_for('person_page', pid='1.8.2') }}">Bill Porter</a> and <a href="{{ url_for('person_page', pid='1.8.2a') }}">Edith Jolley</a>. She finished school in Meaford. She and her mother went west to visit her brothers in about 1921 and both stayed. She still lives in Calgary, Alberta. Mary&rsquo;s grandmother, Mrs. William (Ellen) Kerr, formerly of Meaford, and then living in Calgary, was present at Mary and William Schulz&rsquo;s wedding in Central United Church, Calgary. Mrs. Kerr was 96 years of age and signed the register.</p>
+    
+    <p>Mary tells us of when she and her family would walk to Sunday School and church at St. John&rsquo;s Church, they would pick black and red raspberries on the way. Her <a href="{{ url_for('person_page', pid='1.8') }}">Uncle Isaac</a> and <a href="{{ url_for('person_page', pid='1.8a') }}">Aunt Minnie</a> would wet their hankies and clean the children&rsquo;s faces.</p>
+    
+    <p><a href="{{ url_for('person_page', pid='1.1a') }}">Georgina Maria Porter</a> went west to visit her two sons in about 1921 and stayed. She died in a private nursing home in Calgary at the age of 85 and was buried in Queen&rsquo;s Park, Calgary, Alberta.</p>
+
+    <hr />
+
+    <h3>Notes</h3>
+    <p><a name="note1">Note 1</a>: <u>History of the Schools of St. Vincent Township and Other Chronicles, 1847-1967</u>. P. 246</p>
+{% endblock %}

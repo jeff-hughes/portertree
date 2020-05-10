@@ -1,111 +1,110 @@
-<html>
-    <head>
-        <title>Advanced Search - Porter Family Tree</title>
-    </head>
-    <body>
-        <h2>Advanced Search</h2>
-        <form method="GET" action="{{ url_for('adv_search') }}">
-            <fieldset>
-                <legend>Name</legend>
-                <div>
-                    <label for="first_name">First name:</label>
-                    <input type="text" id="first_name" name="first_name" />
-                </div>
-                <div>
-                    <label for="nickname">Nickname:</label>
-                    <input type="text" id="nickname" name="nickname" />
-                </div>
-                <div>
-                    <label for="middle_name">Middle name:</label>
-                    <input type="text" id="middle_name" name="middle_name" />
-                </div>
-                <div>
-                    <label for="last_name">Last name:</label>
-                    <input type="text" id="last_name" name="last_name" />
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Birth</legend>
-                <div>
-                    <label for="birth_day">Birth day:</label>
-                    <input type="number" id="birth_day" name="birth_day" />
-                </div>
-                <div>
-                    <label for="birth_month">Birth month:</label>
-                    <select id="birth_month" name="birth_month">
-                        <option value="">--</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
-                        <option value="May">May</option>
-                        <option value="June">June</option>
-                        <option value="July">July</option>
-                        <option value="August">August</option>
-                        <option value="September">September</option>
-                        <option value="October">October</option>
-                        <option value="November">November</option>
-                        <option value="December">December</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="birth_year">Birth year</label>
-                    <input type="number" id="birth_year" name="birth_year" />
-                </div>
-                <div>
-                    <label for="birth_place">Birth place:</label>
-                    <input type="text" id="birth_place" name="birth_place" />
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Death</legend>
-                <div>
-                    <label for="death_day">Death day:</label>
-                    <input type="number" id="death_day" name="death_day" />
-                </div>
-                <div>
-                    <label for="death_month">Death month:</label>
-                    <select id="death_month" name="death_month">
-                        <option value="">--</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
-                        <option value="May">May</option>
-                        <option value="June">June</option>
-                        <option value="July">July</option>
-                        <option value="August">August</option>
-                        <option value="September">September</option>
-                        <option value="October">October</option>
-                        <option value="November">November</option>
-                        <option value="December">December</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="death_year">Death year</label>
-                    <input type="number" id="death_year" name="death_year" />
-                </div>
-                <div>
-                    <label for="death_place">Death place:</label>
-                    <input type="text" id="death_place" name="death_place" />
-                </div>
-                <div>
-                    <label for="buried">Burial place:</label>
-                    <input type="text" id="buried" name="buried" />
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Miscellaneous</legend>
-                <div>
-                    <label for="print_id">ID number from print version:</label>
-                    <input type="number" id="print_id" name="print_id" />
-                </div>
-                <div>
-                    <label for="additional_notes">Text in additional notes</label>
-                    <input type="text" id="additional_notes" name="additional_notes" />
-                </div>
-            </fieldset>
-            <div><button type="submit">Search</button></div>
-        </form>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Advanced Search{% endblock %}
+
+{% block content %}
+    <h2>Advanced Search</h2>
+    <form method="GET" action="{{ url_for('adv_search') }}">
+        <fieldset>
+            <legend>Name</legend>
+            <div>
+                <label for="first_name">First name:</label>
+                <input type="text" id="first_name" name="first_name" />
+            </div>
+            <div>
+                <label for="nickname">Nickname:</label>
+                <input type="text" id="nickname" name="nickname" />
+            </div>
+            <div>
+                <label for="middle_name">Middle name:</label>
+                <input type="text" id="middle_name" name="middle_name" />
+            </div>
+            <div>
+                <label for="last_name">Last name:</label>
+                <input type="text" id="last_name" name="last_name" />
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Birth</legend>
+            <div>
+                <label for="birth_day">Birth day:</label>
+                <input type="number" id="birth_day" name="birth_day" />
+            </div>
+            <div>
+                <label for="birth_month">Birth month:</label>
+                <select id="birth_month" name="birth_month">
+                    <option value="">--</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+            </div>
+            <div>
+                <label for="birth_year">Birth year</label>
+                <input type="number" id="birth_year" name="birth_year" />
+            </div>
+            <div>
+                <label for="birth_place">Birth place:</label>
+                <input type="text" id="birth_place" name="birth_place" />
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Death</legend>
+            <div>
+                <label for="death_day">Death day:</label>
+                <input type="number" id="death_day" name="death_day" />
+            </div>
+            <div>
+                <label for="death_month">Death month:</label>
+                <select id="death_month" name="death_month">
+                    <option value="">--</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+            </div>
+            <div>
+                <label for="death_year">Death year</label>
+                <input type="number" id="death_year" name="death_year" />
+            </div>
+            <div>
+                <label for="death_place">Death place:</label>
+                <input type="text" id="death_place" name="death_place" />
+            </div>
+            <div>
+                <label for="buried">Burial place:</label>
+                <input type="text" id="buried" name="buried" />
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Miscellaneous</legend>
+            <div>
+                <label for="print_id">ID number from print version:</label>
+                <input type="number" id="print_id" name="print_id" />
+            </div>
+            <div>
+                <label for="additional_notes">Text in additional notes</label>
+                <input type="text" id="additional_notes" name="additional_notes" />
+            </div>
+        </fieldset>
+        <div><button type="submit">Search</button></div>
+    </form>
+{% endblock %}
