@@ -3,7 +3,7 @@ import os
 from py2neo import Graph, NodeMatcher
 
 #from app import app
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 app = Flask(__name__)
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -68,6 +68,30 @@ def index():
         else:
             string = "{} - ?)<br>".format(string)
     return string
+
+
+@app.route('/search', methods=['GET'])
+def adv_search():
+    if len(request.args) > 0:
+        match_args = {}
+        for k, v in request.args.items():
+            if v != "":
+                # suffix provides details to Neo4j about search type
+                if k == "middle_name":
+                    match_args["middle_name1__contains"] = v
+                    match_args["middle_name2__contains"] = v
+                elif "name" in k or k == "buried" or k == "additional_notes":
+                    match_args[k + "__contains"] = v
+                else:
+                    match_args[k + "__exact"] = v
+        
+        res = list(matcher.match("Person", **match_args).order_by("_.birth_year"))
+        for r in res:
+            r["display_name"] = create_display_name(r)
+            r["life_span"] = create_life_span(r)
+        return render_template("search_results.html", results=res)
+    else:
+        return render_template("adv_search.html")
 
 
 @app.route('/p/<pid>')
