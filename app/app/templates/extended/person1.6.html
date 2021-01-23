@@ -1,0 +1,11 @@
+{% extends "person.html" %}
+
+{% block content %}
+    {{ super() }}
+
+    <p>Eliza Ann Porter was born in 1855 at Lot 16, Concession 10 of St. Vincent Township. She married <a href="{{ url_for('person_page', pid='1.6a') }}">James Free</a>. They had four children &ndash; <a href="{{ url_for('person_page', pid='1.6.1') }}">John P.</a>, <a href="{{ url_for('person_page', pid='1.6.2') }}">Stanley</a>, <a href="{{ url_for('person_page', pid='1.6.3') }}">Ethel</a> and <a href="{{ url_for('person_page', pid='1.6.4') }}">Ellen</a> Free. (We are not sure of the order of the last three listed.)</p>
+
+    <p>James and Eliza Ann Free are listed in the 1881 St. Vincent Township census, both Irish, with one son, <a href="{{ url_for('person_page', pid='1.6.1') }}">John P.</a>, age 1. James was a farmer. They are not listed in the 1891 St. Vincent Township census. Some time after 1881 the Free family moved to Amarillo, Texas and we have lost contact with them.</p>
+    
+    <p>James was a son of Henry Free who owned 100 acres, the south half of Lot 1, Concession 9, of St. Vincent Township. James had a brother William who bought the farm from his father.</p>
+{% endblock %}

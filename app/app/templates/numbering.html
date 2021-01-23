@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Explanation of Numbering System{% endblock %}
+
+{% block body_class %}numbering{% endblock %}
+
+{% block content %}
+    <h2>Explanation of Numbering System</h2>
+    <p>Each person has been assigned a number. Each time you add another number to a group, you move to the next generation. Each child of a family is listed in order of birth with their children listed after them.</p>
+
+    <p>1. Number assigned to <a href="{{ url_for('person_page', pid='1') }}">William Porter</a> and <a href="{{ url_for('person_page', pid='1a') }}">Elizabeth Kenney</a>.</p>
+
+    <p>1.1. Adding one digit indicates a child of William and Elizabeth; this number is for <a href="{{ url_for('person_page', pid='1.1') }}">David Porter</a>.</p>
+
+    <p>1.1.3. Adding another digit indicates a child of David and <a href="{{ url_for('person_page', pid='1.1a') }}">Georgina Porter</a>, or grandchild of William and Elizabeth Porter; this number is for <a href="{{ url_for('person_page', pid='1.1.3') }}">Bernice Kerr Porter</a>.</p>
+
+    <p>1.1.3.2. Adding another digit indicates a child of Bernice and <a href="{{ url_for('person_page', pid='1.1.3a') }}">William Herman</a>; this number is for <a href="{{ url_for('person_page', pid='1.1.3.2') }}">Aura Jean Herman</a>.</p>
+
+    <p><em>Notes for the online version:</em> For this online version of this family history, two adjustments were made to the numbering system. First, a dot was added in between each generation to avoid ambiguities when a family had more than 10 children. In the typewritten version, this was designated by underlining the two digits; underlining, however, doesn&rsquo;t work well for databases.</p>
+    
+    <p>Second, pages were also created for spouses, i.e., people who are included in the family tree by marriage rather than birth. The numbers for these individuals include letters afterwards. For example, the spouse of <a href="{{ url_for('person_page', pid='1.1.3') }}">Bernice Kerr Porter</a> (1.1.3) is <a href="{{ url_for('person_page', pid='1.1.3a') }}">William Frater Herman</a> (1.1.3a). In the case of subsequent marriages, the letters would increment to b, c, etc.</p>
+
+    <p>In most cases, however, the numbering scheme is less relevant due to the hyperlinks provided to navigate the family tree. The numbers appear in the URL for each person.</p>
+{% endblock %}

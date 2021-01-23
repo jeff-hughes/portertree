@@ -2,6 +2,8 @@
 
 {% block title %}{{ data.focus.display_name | safe }}{% endblock %}
 
+{% block body_class %}person{% endblock %}
+
 {% block content %}
     <h2>{{ data.focus.display_name | safe }} {{ data.focus.life_span }}</h2>
     <dl>

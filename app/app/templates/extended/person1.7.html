@@ -1,0 +1,7 @@
+{% extends "person.html" %}
+
+{% block content %}
+    {{ super() }}
+
+    <p>Ellen Porter was born in 1856 on the homestead and lived there with her family until 1910. She bought a new house at 178 Margaret Street and took in boarders. She kept chickens in the back lean-to of the house. Because of poor health, she later moved to a smaller house at 169 St. Vincent Street where she kept chickens in a coop in her backyard. She died in 1932 at the home of her niece, <a href="{{ url_for('person_page', pid='1.5.2') }}">Hattie Ellis</a>.</p>
+{% endblock %}

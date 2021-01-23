@@ -16,58 +16,59 @@ matcher = NodeMatcher(graph)
 
 @app.route('/')
 def index():
-    records = graph.run("MATCH (child:Person)<-[:PARENT_OF]-(parent:Person { id: {id} }) \
-        RETURN child.first_name AS first_name, \
-            child.nickname AS nickname, \
-            child.middle_name1 AS middle_name1, \
-            child.middle_name2 AS middle_name2, \
-            child.last_name AS last_name, \
-            child.pref_name AS pref_name, \
-            child.gender AS gender, \
-            child.birth_month AS birth_month, \
-            child.birth_day AS birth_day, \
-            child.birth_year AS birth_year, \
-            child.birth_place AS birth_place, \
-            child.death_month AS death_month, \
-            child.death_day AS death_day, \
-            child.death_year AS death_year, \
-            child.death_place AS death_place, \
-            child.buried AS buried, \
-            child.additional_notes AS additional_notes, \
-            child.birth_order AS order \
-        ORDER BY child.birth_order", {'id': '1'}).data()
-    string = ""
-    for record in records:
-        # name data
-        string = "{} {}".format(string, record['first_name'])
-        if is_attr(record, 'nickname'):
-            string = "{} ({})".format(string, record['nickname'])
-        if is_attr(record, 'middle_name1'):
-            if record['pref_name'] == 'M1':
-                string = "{} <u>{}</u>".format(string, record['middle_name1'])
-            else:
-                string = "{} {}".format(string, record['middle_name1'])
-        if is_attr(record, 'middle_name2'):
-            if record['pref_name'] == 'M2':
-                string = "{} <u>{}</u>".format(string, record['middle_name2'])
-            else:
-                string = "{} {}".format(string, record['middle_name2'])
-        string = "{} {}".format(string, record['last_name'])
+    # records = graph.run("MATCH (child:Person)<-[:PARENT_OF]-(parent:Person { id: {id} }) \
+    #     RETURN child.first_name AS first_name, \
+    #         child.nickname AS nickname, \
+    #         child.middle_name1 AS middle_name1, \
+    #         child.middle_name2 AS middle_name2, \
+    #         child.last_name AS last_name, \
+    #         child.pref_name AS pref_name, \
+    #         child.gender AS gender, \
+    #         child.birth_month AS birth_month, \
+    #         child.birth_day AS birth_day, \
+    #         child.birth_year AS birth_year, \
+    #         child.birth_place AS birth_place, \
+    #         child.death_month AS death_month, \
+    #         child.death_day AS death_day, \
+    #         child.death_year AS death_year, \
+    #         child.death_place AS death_place, \
+    #         child.buried AS buried, \
+    #         child.additional_notes AS additional_notes, \
+    #         child.birth_order AS order \
+    #     ORDER BY child.birth_order", {'id': '1'}).data()
+    # string = ""
+    # for record in records:
+    #     # name data
+    #     string = "{} {}".format(string, record['first_name'])
+    #     if is_attr(record, 'nickname'):
+    #         string = "{} ({})".format(string, record['nickname'])
+    #     if is_attr(record, 'middle_name1'):
+    #         if record['pref_name'] == 'M1':
+    #             string = "{} <u>{}</u>".format(string, record['middle_name1'])
+    #         else:
+    #             string = "{} {}".format(string, record['middle_name1'])
+    #     if is_attr(record, 'middle_name2'):
+    #         if record['pref_name'] == 'M2':
+    #             string = "{} <u>{}</u>".format(string, record['middle_name2'])
+    #         else:
+    #             string = "{} {}".format(string, record['middle_name2'])
+    #     string = "{} {}".format(string, record['last_name'])
 
-        # birth and death years
-        if is_attr(record, 'birth_year'):
-            string = "{} ({}".format(string, record['birth_year'])
-        else:
-            string = "{} (? ".format(string)
+    #     # birth and death years
+    #     if is_attr(record, 'birth_year'):
+    #         string = "{} ({}".format(string, record['birth_year'])
+    #     else:
+    #         string = "{} (? ".format(string)
 
-        if is_attr(record, 'death_year'):
-            string = "{} - {})<br>".format(string, record['death_year'])
-        elif is_attr(record, 'birth_year') and int(record['birth_year']) >= (2019-100):
-            string = "{} - present)<br>".format(string)
-            # assume the best if someone is less than 100 years old :)
-        else:
-            string = "{} - ?)<br>".format(string)
-    return string
+    #     if is_attr(record, 'death_year'):
+    #         string = "{} - {})<br>".format(string, record['death_year'])
+    #     elif is_attr(record, 'birth_year') and int(record['birth_year']) >= (2019-100):
+    #         string = "{} - present)<br>".format(string)
+    #         # assume the best if someone is less than 100 years old :)
+    #     else:
+    #         string = "{} - ?)<br>".format(string)
+    # return string
+    return render_template("index.html")
 
 
 @app.route('/search', methods=['GET'])
@@ -151,11 +152,37 @@ def person_page(pid):
         key=lambda k: k["birth_order"] if "birth_order" in k else 1000000)
 
     # special cases with extended notes about the early family members
-    extended = ["1", "1.1", "1.2", "1.3"]
+    extended = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
     if data["focus"]["id"] in extended:
         return render_template(f"extended/person{data['focus']['id']}.html", data=data)
     else:
         return render_template("person.html", data=data)
+
+
+@app.route('/in-memoriam')
+def in_memoriam():
+    return render_template("in_memoriam.html")
+
+
+@app.route('/preface')
+def preface():
+    return render_template("preface.html")
+
+
+@app.route('/numbering')
+def numbering():
+    return render_template("numbering.html")
+
+
+@app.route('/technical-details')
+def technical_details():
+    return render_template("technical_details.html")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('404.html'), 404
 
 
 # Helper functions
