@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block body_class %}index{% endblock %}
+
+{% block content %}
+    <div class="focus_text">
+        <h2>The Family History of William Porter and Elizabeth Kenney</h2>
+        <p class="start_links"><a href="{{ url_for('person_page', pid='1') }}">William Porter</a> &ndash; <a href="{{ url_for('person_page', pid='1a') }}">Elizabeth Kenney</a></p>
+
+        <form method="GET" action="{{ url_for('adv_search') }}">
+            <p><input type="text" name="search" id="search" placeholder="Search for name..." aria-placeholder="Search for name" /></p>
+        </form>
+
+        <p><a href="{{ url_for('in_memoriam') }}">In Memoriam of Mary Elizabeth (Porter) Hughes</a></p>
+    </div>
+
+    <div class="additional_container">
+        <h3 id="additional-materials">Additional Materials</h3>
+        <ul id="additional_list">
+            <li><a href="{{ url_for('preface') }}">Original Preface: A Few Thoughts</a></li>
+            <li><a href="{{ url_for('numbering') }}">Explanation of Numbering System</a></li>
+            <li><a href="{{ url_for('person_page', pid='1') }}#history-of-porters">History of the Porters (1949)</a></li>
+            <li><a href="#">Maps</a></li>
+            <li><a href="#">Download PDF of original family history</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <ul>
+            <li><a href="#">Report an update/error</a></li>
+            <li><a href="{{ url_for('technical_details') }}">Technical Details</a></li>
+        </ul>
+    </footer>
+{% endblock %}
