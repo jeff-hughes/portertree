@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Maps{% endblock %}
+
+{% block body_class %}maps{% endblock %}
+
+{% block content %}
+    <h2>Maps</h2>
+
+    <h3>St. Vincent Township, 1880</h3>
+    <img src="{{ url_for('static', filename='img/map_stvincent_1880.png') }}" alt="Map of St. Vincent Township, 1880" style="width: 800px" />
+
+    <h3>St. Vincent Township, 1941-1942</h3>
+    <img src="{{ url_for('static', filename='img/map_stvincent_1941.png') }}" alt="Map of St. Vincent Township, 1941-1942" style="width: 800px" />
+
+    <h3>Town of Meaford, 1845</h3>
+    <img src="{{ url_for('static', filename='img/map_meaford_1845.png') }}" alt="Map of Town of Meaford, 1845" style="width: 800px" />
+
+    <h3>Town of Meaford, 1990</h3>
+    <img src="{{ url_for('static', filename='img/map_meaford_1990.png') }}" alt="Map of Town of Meaford, 1990" style="width: 800px" />
+{% endblock %}

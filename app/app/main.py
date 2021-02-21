@@ -174,6 +174,11 @@ def numbering():
     return render_template("numbering.html")
 
 
+@app.route('/maps')
+def maps():
+    return render_template("maps.html")
+
+
 @app.route('/technical-details')
 def technical_details():
     return render_template("technical_details.html")
