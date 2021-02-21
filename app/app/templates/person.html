@@ -15,27 +15,27 @@
         {% if data.focus.additional_notes %}<dt>Notes: </dt><dd>{{ data.focus.additional_notes }}</dd>{% endif %}
     </dl>
 
-    <h3>Parents</h3>
     {% if data.parents | length > 0 %}
+        <h3>Parent{% if data.parents | length > 1 %}s{% endif %}</h3>
         <ul>
             {% for p in data.parents %} 
                 <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }}</a></li> 
             {% endfor %}
         </ul>
     {% endif %}
-    <h3>Spouses</h3>
     {% if data.spouses | length > 0 %}
+        <h3>Spouse{% if data.spouses | length > 1 %}s{% endif %}</h3>
         <ul>
             {% for s in data.spouses %} 
-                <li><a href="{{ url_for('person_page', pid=s.id) }}">{{ s.display_name | safe }}</a></li> 
+                <li><a href="{{ url_for('person_page', pid=s.id) }}">{{ s.display_name | safe }} {{ s.life_span }}</a></li> 
             {% endfor %}
         </ul>
     {% endif %}
-    <h3>Children</h3>
     {% if data.children | length > 0 %}
+        <h3>Child{% if data.children | length > 1 %}ren{% endif %}</h3>
         <ul>
             {% for c in data.children %} 
-                <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }}</a></li> 
+                <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }} {{ c.life_span }}</a></li> 
             {% endfor %}
         </ul>
     {% endif %}

@@ -124,6 +124,10 @@ def person_page(pid):
     data["focus"]["display_name"] = create_display_name(p)
     data["focus"]["life_span"] = create_life_span(p)
 
+    # if ID ends with a letter (e.g., "1.1.3a"), then this person
+    # married into the family
+    by_marriage = pid[-1].isalpha()
+
     # get info on focal person's parents
     data["parents"] = []
     parents = graph.match((None, p), r_type="PARENT_OF")
@@ -143,7 +147,7 @@ def person_page(pid):
             graph.pull(prc.end_node)
             prc_dict = dict(prc.end_node)
             prc_dict["display_name"] = create_display_name(prc.end_node)
-            prc_dict["life_span"] = create_life_span(prc.start_node)
+            prc_dict["life_span"] = create_life_span(prc.end_node)
             pr_dict["children"].append(prc_dict)
         pr_dict["children"] = sorted(pr_dict["children"],
             key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
@@ -154,10 +158,14 @@ def person_page(pid):
     data["spouses"] = []
     spouses = graph.match(set((p, )), r_type="MARRIED_TO")
     for s in spouses:
-        graph.pull(s.end_node)
-        s_dict = dict(s.end_node)
-        s_dict["display_name"] = create_display_name(s.end_node)
-        s_dict["life_span"] = create_life_span(s.start_node)
+        if by_marriage:
+            node = s.start_node
+        else:
+            node = s.end_node
+        graph.pull(node)
+        s_dict = dict(node)
+        s_dict["display_name"] = create_display_name(node)
+        s_dict["life_span"] = create_life_span(node)
         data["spouses"].append(s_dict)
 
     # get info on focal person's children
@@ -167,7 +175,7 @@ def person_page(pid):
         graph.pull(c.end_node)
         c_dict = dict(c.end_node)
         c_dict["display_name"] = create_display_name(c.end_node)
-        c_dict["life_span"] = create_life_span(c.start_node)
+        c_dict["life_span"] = create_life_span(c.end_node)
         data["children"].append(c_dict)
     data["children"] = sorted(data["children"],
         key=lambda k: k["birth_order"] if "birth_order" in k else 1000000)
