@@ -72,6 +72,27 @@ def index():
 
 
 @app.route('/search', methods=['GET'])
+def search():
+    if len(request.args) > 0:
+        terms = request.args.get("search", "").split()
+        match_args = []
+        for t in terms:
+            # case insensitive matching for each space-separated term
+            # in the query
+            match_args.append(f"(_.first_name =~ '(?i).*{t}.*' OR _.nickname =~ '(?i).*{t}.*' OR _.middle_name1 =~ '(?i).*{t}.*' OR _.middle_name2 =~ '(?i).*{t}.*' OR _.last_name =~ '(?i).*{t}.*')")
+        # apparently using multiple `where()` methods results in an
+        # implicit "OR", so we're joining the queries together into one
+        # big statement instead
+        res = list(matcher.match("Person").where(" AND ".join(match_args)).order_by("_.birth_year"))
+        for r in res:
+            r["display_name"] = create_display_name(r)
+            r["life_span"] = create_life_span(r)
+        return render_template("search_results.html", results=res)
+    else:
+        return render_template("search_results.html", results=[])
+
+
+@app.route('/advsearch', methods=['GET'])
 def adv_search():
     if len(request.args) > 0:
         match_args = {}

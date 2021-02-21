@@ -9,7 +9,7 @@
     {% if results | length > 0 %}
         <ul>
             {% for r in results %}
-                <li><a href="{{ url_for('person_page', pid=r.id) }}">{{ r.display_name }} {{ r.life_span }}</a></li>
+                <li><a href="{{ url_for('person_page', pid=r.id) }}">{{ r.display_name | safe }} {{ r.life_span }}</a></li>
             {% endfor %}
         </ul>
     {% else %}
