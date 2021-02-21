@@ -13,5 +13,12 @@
     </head>
     <body class="{% block body_class %}index{% endblock %}">
         <div id="main_content">{% block content %}{% endblock %}</div>
+        <footer>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home page</a></li>
+                <li><a href="{{ url_for('adv_search') }}">Search</a></li>
+                <li><a href="#">Report an update/error</a></li>
+            </ul>
+        </footer>
     </body>
 </html>

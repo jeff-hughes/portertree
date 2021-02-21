@@ -12,8 +12,7 @@
         <form method="GET" action="{{ url_for('search') }}">
             <p><input type="text" name="search" id="search" placeholder="Search for name..." aria-placeholder="Search for name" /></p>
         </form>
-        <br />
-        <a href="{{ url_for('adv_search') }}">Advanced Search</a>
+        <div class="advsearch_container"><a href="{{ url_for('adv_search') }}">Advanced search</a></div>
 
         <p><a href="{{ url_for('in_memoriam') }}">In Memoriam of Mary Elizabeth (Porter) Hughes</a></p>
     </div>
@@ -25,14 +24,14 @@
             <li><a href="{{ url_for('numbering') }}">Explanation of Numbering System</a></li>
             <li><a href="{{ url_for('person_page', pid='1') }}#history-of-porters">History of the Porters (1949)</a></li>
             <li><a href="{{ url_for('maps') }}">Maps</a></li>
-            <li><a href="{{ url_for('static', filename='PorterHistory1991.pdf') }}">Download PDF of original family history (1991)</a></li>
+            <li><a href="{{ url_for('static', filename='PorterHistory1991.pdf') }}">Download PDF of original family history</a></li>
         </ul>
     </div>
 
-    <footer>
+    <div id="index_footer">
         <ul>
             <li><a href="#">Report an update/error</a></li>
             <li><a href="{{ url_for('technical_details') }}">Technical Details</a></li>
         </ul>
-    </footer>
+    </div>
 {% endblock %}

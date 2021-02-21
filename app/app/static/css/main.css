@@ -92,6 +92,23 @@ body {
     max-width: 800px;
 }
 
+footer {
+    margin-top: 5em;
+    text-align: center;
+}
+
+footer ul {
+    font-size: 90%;
+    list-style: none;
+    margin: 0 auto;
+    padding-left: 0;
+}
+
+footer li {
+    display: inline;
+    padding: 1em 1em;
+}
+
 body.index .focus_text {
     margin-top: 3em;
     text-align: center;
@@ -106,7 +123,17 @@ body.index #search {
     font-size: 130%;
     margin-bottom: 1em;
     padding: .5em;
-    width: 80%
+    width: 80%;
+}
+
+body.index .advsearch_container {
+    font-size: 80%;
+    margin: 0 auto;
+    position: relative;
+    top: -2.5em;
+    right: -1em;
+    text-align: right;
+    width: 80%;
 }
 
 body.index .additional_container {
@@ -126,24 +153,63 @@ body.index #additional_list {
     line-height: 1.8em;
 }
 
-body.index #additional_list li {
-}
-
-body.index footer {
+body.index #index_footer {
     margin-top: 5em;
     text-align: center;
 }
 
-body.index footer ul {
+body.index #index_footer ul {
     font-size: 90%;
     list-style: none;
     margin: 0 auto;
     padding-left: 0;
 }
 
-body.index footer li {
+body.index #index_footer li {
     display: inline;
     padding: 1em 1em;
+}
+
+body.index footer {
+    display: none;
+}
+
+body.adv_search form {
+    display: grid;
+    align-items: center;
+    grid-template-columns: [labels] 8em [inputs] 1fr;
+    margin: 0 auto;
+    width: 60%;
+}
+
+body.adv_search form fieldset {
+    display: contents;
+}
+
+body.adv_search form legend {
+    font-weight: bold;
+    grid-column: span 2;
+    margin-top: 2em;
+}
+
+body.adv_search form fieldset:first-of-type legend {
+    margin-top: 0;
+}
+
+body.adv_search form label {
+    grid-column: labels;
+    grid-row: auto;
+    margin: 5px;
+    text-align: right;
+}
+
+body.adv_search form input,
+body.adv_search form select,
+body.adv_search form textarea,
+body.adv_search form button {
+    grid-column: inputs;
+    grid-row: auto;
+    margin: 5px;
 }
 
 /* ==========================================================================
