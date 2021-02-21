@@ -25,7 +25,7 @@
             <li><a href="{{ url_for('numbering') }}">Explanation of Numbering System</a></li>
             <li><a href="{{ url_for('person_page', pid='1') }}#history-of-porters">History of the Porters (1949)</a></li>
             <li><a href="{{ url_for('maps') }}">Maps</a></li>
-            <li><a href="#">Download PDF of original family history</a></li>
+            <li><a href="{{ url_for('static', filename='PorterHistory1991.pdf') }}">Download PDF of original family history (1991)</a></li>
         </ul>
     </div>
 
