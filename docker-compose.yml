@@ -13,13 +13,13 @@ services:
             - neo4j-logs:/logs
         env_file: .env
         networks:
-            - porterapp
+            - porter
 
     app:
         build:
             context: ./app
             target: dev
-        container_name: porterapp
+        container_name: portertree
         restart: always
         ports:
             - 8080:80
@@ -29,14 +29,14 @@ services:
         depends_on:
             - db
         networks:
-            - porterapp
+            - porter
 
 volumes:
     neo4j-data:
     neo4j-logs:
 
 networks:
-    porterapp:
+    porter:
 
 # .env file needs to contain:
 # NEO4J_USERNAME=aaaaa
