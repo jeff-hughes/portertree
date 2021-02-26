@@ -11,9 +11,9 @@
 
         {% if load_treegraph %}
         <link rel="stylesheet" href="{{ url_for('static', filename='css/treegraph.css') }}">
-        <script src="{{ url_for('static', filename='js/lodash_4.17.21/lodash.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/d3_4.13.0/d3.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/dTree_2.4.1/dTree.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/lodash_4.17.21/lodash.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/d3_4.13.0/d3.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/dTree_2.4.1/dTree.min.js') }}"></script>
         {% endif %}
 
         <meta name="theme-color" content="#fafafa">
@@ -27,5 +27,6 @@
                 <li><a href="#">Report an update/error</a></li>
             </ul>
         </footer>
+        {% if load_treegraph %}<script src="{{ url_for('static', filename='js/treegraph.js') }}"></script>{% endif %}
     </body>
 </html>

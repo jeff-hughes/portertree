@@ -4,7 +4,7 @@ import os
 from py2neo import Graph, NodeMatcher
 
 #from app import app
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
 app = Flask(__name__)
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -134,6 +134,7 @@ def person_page(pid):
     if is_attr(data["focus"], "gender") and data["focus"]["gender"] in gender_dict:
         tree_focal["class"] = gender_dict[data["focus"]["gender"]]
     tree_focal["textClass"] = "emphasis"
+    tree_focal["extra"] = { "url": url_for("person_page", pid=data["focus"]["id"]) }
 
     # get info on focal person's parents
     data["parents"] = []
@@ -159,6 +160,7 @@ def person_page(pid):
             tree_parent["name"] = pr_display_name
             if is_attr(pr_dict, "gender") and pr_dict["gender"] in gender_dict:
                 tree_parent["class"] = gender_dict[pr_dict["gender"]]
+            tree_parent["extra"] = { "url": url_for("person_page", pid=pr_dict["id"]) }
             if pr_dict["in_tree"]:
                 tree_parents[0] = tree_parent
             else:
@@ -192,6 +194,7 @@ def person_page(pid):
                 tree_sib["name"] = sib["display_name"]
                 if is_attr(sib, "gender") and sib["gender"] in gender_dict:
                     tree_sib["class"] = gender_dict[sib["gender"]]
+                tree_sib["extra"] = { "url": url_for("person_page", pid=sib["id"]) }
                 tree_siblings.append(tree_sib)
 
         treegraph["marriages"][0]["children"] = tree_siblings
@@ -216,6 +219,7 @@ def person_page(pid):
         tree_spouse["name"] = s_display_name
         if is_attr(s_dict, "gender") and s_dict["gender"] in gender_dict:
             tree_spouse["class"] = gender_dict[s_dict["gender"]]
+        tree_spouse["extra"] = { "url": url_for("person_page", pid=s_dict["id"]) }
         tree_spouses.append({ "spouse": tree_spouse })
     
     if len(spouses) > 0:
@@ -237,6 +241,7 @@ def person_page(pid):
                 tree_c["name"] = c_display_name
                 if is_attr(c, "gender") and c["gender"] in gender_dict:
                     tree_c["class"] = gender_dict[c["gender"]]
+                tree_c["extra"] = { "url": url_for("person_page", pid=c["id"]) }
                 tree_children.append(tree_c)
 
             tree_focal["marriages"][i]["children"] = tree_children

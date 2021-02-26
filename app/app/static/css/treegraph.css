@@ -16,8 +16,9 @@
 .treegraph .node {
     border: 1px #000 solid;
     box-sizing: border-box;
-    height: 100%;
+    text-align: center;
     width: 100%;
+    height: 100%;
 }
 
 .treegraph .marriageNode {
@@ -35,4 +36,9 @@
 
 .treegraph .emphasis {
     font-weight: bold;
+}
+
+.treegraph .node a {
+    color: #000;
+    text-decoration: none;
 }
