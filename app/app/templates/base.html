@@ -9,6 +9,13 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
+        {% if load_treegraph %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/treegraph.css') }}">
+        <script src="{{ url_for('static', filename='js/lodash_4.17.21/lodash.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/d3_4.13.0/d3.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/dTree_2.4.1/dTree.js') }}"></script>
+        {% endif %}
+
         <meta name="theme-color" content="#fafafa">
     </head>
     <body class="{% block body_class %}index{% endblock %}">

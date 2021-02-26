@@ -6,7 +6,7 @@ DATABASE_ROWS=$(cypher-shell --format plain "MATCH (n) RETURN count(n)" | sed -n
 if [ "$DATABASE_ROWS" == 0 ]
 then
     cypher-shell "LOAD CSV WITH HEADERS FROM 'file:///people.csv' AS row \
-        CREATE (:Person {id: row.id, print_id: row.print_id, first_name: row.first_name, nickname: row.nickname, \
+        CREATE (:Person {id: row.id, print_id: row.print_id, in_tree: toBoolean(row.in_tree), first_name: row.first_name, nickname: row.nickname, \
         middle_name1: row.middle_name1, middle_name2: row.middle_name2, last_name: row.last_name, pref_name: row.pref_name, \
         gender: row.gender, birth_month: row.birth_month, birth_day: row.birth_day, birth_year: row.birth_year, \
         birth_place: row.birth_place, death_month: row.death_month, death_day: row.death_day, death_year: row.death_year, \

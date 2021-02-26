@@ -1,0 +1,38 @@
+.treegraph svg {
+    border: 1px #000 solid;
+}
+
+.treegraph p {
+    margin: 0;
+    padding: 0;
+}
+
+.treegraph .linage,
+.treegraph .marriage {
+    fill: none;
+    stroke: #000;
+}
+
+.treegraph .node {
+    border: 1px #000 solid;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+}
+
+.treegraph .marriageNode {
+    background-color: black;
+    border-radius: 50%;
+}
+
+.treegraph .man {
+    background-color: #add8e6;
+}
+
+.treegraph .woman {
+    background-color: #fcc0cb;
+}
+
+.treegraph .emphasis {
+    font-weight: bold;
+}

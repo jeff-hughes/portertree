@@ -1,3 +1,4 @@
+import json
 import os
 
 from py2neo import Graph, NodeMatcher
@@ -119,66 +120,140 @@ def adv_search():
 @app.route('/p/<pid>')
 def person_page(pid):
     data = {}
+    treegraph = {}
+    gender_dict = { "M": "man", "F": "woman" }
+
     p = matcher.match("Person", id=pid).first()
     data["focus"] = dict(p)
-    data["focus"]["display_name"] = create_display_name(p)
+    display_name = create_display_name(p)
+    data["focus"]["display_name"] = display_name
     data["focus"]["life_span"] = create_life_span(p)
 
-    # if ID ends with a letter (e.g., "1.1.3a"), then this person
-    # married into the family
-    by_marriage = pid[-1].isalpha()
+    tree_focal = {}
+    tree_focal["name"] = display_name
+    if is_attr(data["focus"], "gender") and data["focus"]["gender"] in gender_dict:
+        tree_focal["class"] = gender_dict[data["focus"]["gender"]]
+    tree_focal["textClass"] = "emphasis"
 
     # get info on focal person's parents
     data["parents"] = []
+    parent_ids = [None, None]
     parents = graph.match((None, p), r_type="PARENT_OF")
-    for pr in parents:
-        graph.pull(pr.start_node)
-        pr_dict = dict(pr.start_node)
-        pr_dict["display_name"] = create_display_name(pr.start_node)
-        pr_dict["life_span"] = create_life_span(pr.start_node)
+
+    if len(parents) > 0:
+        focal_birth_order = None
+        tree_parents = [None, None]
+        for pr in parents:
+            graph.pull(pr.start_node)
+            pr_dict = dict(pr.start_node)
+            pr_display_name = create_display_name(pr.start_node)
+            pr_dict["display_name"] = pr_display_name
+            pr_dict["life_span"] = create_life_span(pr.start_node)
+
+            if pr_dict["in_tree"]:
+                parent_ids[0] = pr_dict["id"]
+            else:
+                parent_ids[1] = pr_dict["id"]
+
+            tree_parent = {}
+            tree_parent["name"] = pr_display_name
+            if is_attr(pr_dict, "gender") and pr_dict["gender"] in gender_dict:
+                tree_parent["class"] = gender_dict[pr_dict["gender"]]
+            if pr_dict["in_tree"]:
+                tree_parents[0] = tree_parent
+            else:
+                tree_parents[1] = tree_parent
+
+            data["parents"].append(pr_dict)
+
+        data["parents"] = sorted(data["parents"], key=birthdate_sorter)
+        treegraph = tree_parents[0]
+        treegraph["marriages"] = [{}]
+        treegraph["marriages"][0]["spouse"] = tree_parents[1]
 
         # get info on focal person's siblings
-        # TODO: this currently will end up duplicating all the full
-        # siblings (half-siblings will only appear once); maybe there's
-        # a more efficient way to create this list
-        pr_dict["children"] = []
-        pr_children = graph.match((pr.start_node, ), r_type="PARENT_OF")
-        for prc in pr_children:
-            graph.pull(prc.end_node)
-            prc_dict = dict(prc.end_node)
-            prc_dict["display_name"] = create_display_name(prc.end_node)
-            prc_dict["life_span"] = create_life_span(prc.end_node)
-            pr_dict["children"].append(prc_dict)
-        pr_dict["children"] = sorted(pr_dict["children"],
+        siblings = get_children_of_parents(parent_ids[0], parent_ids[1])
+        data["siblings"] = []
+        for sib in siblings:
+            sib_dict = dict(sib)
+            sib_dict["display_name"] = create_display_name(sib)
+            sib_dict["life_span"] = create_life_span(sib)
+            data["siblings"].append(sib_dict)
+        data["siblings"] = sorted(data["siblings"],
             key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
-        data["parents"].append(pr_dict)
-    data["parents"] = sorted(data["parents"], key=birthdate_sorter)
+
+        tree_siblings = []
+        for j, sib in enumerate(data["siblings"]):
+            if sib["id"] == pid:
+                tree_siblings.append(tree_focal)
+                focal_birth_order = j
+            else:
+                tree_sib = {}
+                tree_sib["name"] = sib["display_name"]
+                if is_attr(sib, "gender") and sib["gender"] in gender_dict:
+                    tree_sib["class"] = gender_dict[sib["gender"]]
+                tree_siblings.append(tree_sib)
+
+        treegraph["marriages"][0]["children"] = tree_siblings
 
     # get info on focal person's spouse(s)
     data["spouses"] = []
+    tree_spouses = []
     spouses = graph.match(set((p, )), r_type="MARRIED_TO")
     for s in spouses:
-        if by_marriage:
-            node = s.start_node
-        else:
+        if data["focus"]["in_tree"]:
             node = s.end_node
+        else:
+            node = s.start_node
         graph.pull(node)
         s_dict = dict(node)
+        s_display_name = create_display_name(node)
         s_dict["display_name"] = create_display_name(node)
         s_dict["life_span"] = create_life_span(node)
         data["spouses"].append(s_dict)
 
-    # get info on focal person's children
-    data["children"] = []
-    children = graph.match((p, ), r_type="PARENT_OF")
-    for c in children:
-        graph.pull(c.end_node)
-        c_dict = dict(c.end_node)
-        c_dict["display_name"] = create_display_name(c.end_node)
-        c_dict["life_span"] = create_life_span(c.end_node)
-        data["children"].append(c_dict)
-    data["children"] = sorted(data["children"],
-        key=lambda k: k["birth_order"] if "birth_order" in k else 1000000)
+        tree_spouse = {}
+        tree_spouse["name"] = s_display_name
+        if is_attr(s_dict, "gender") and s_dict["gender"] in gender_dict:
+            tree_spouse["class"] = gender_dict[s_dict["gender"]]
+        tree_spouses.append({ "spouse": tree_spouse })
+    
+    if len(spouses) > 0:
+        tree_focal["marriages"] = tree_spouses
+
+        # get info on focal person's children
+        data["children"] = []
+        for i, s in enumerate(data["spouses"]):
+            children = get_children_of_parents(pid, s["id"])
+            tree_children = []
+            for c in children:
+                c_dict = dict(c)
+                c_display_name = create_display_name(c)
+                c_dict["display_name"] = c_display_name
+                c_dict["life_span"] = create_life_span(c)
+                data["children"].append(c_dict)
+
+                tree_c = {}
+                tree_c["name"] = c_display_name
+                if is_attr(c, "gender") and c["gender"] in gender_dict:
+                    tree_c["class"] = gender_dict[c["gender"]]
+                tree_children.append(tree_c)
+
+            tree_focal["marriages"][i]["children"] = tree_children
+        data["children"] = sorted(data["children"],
+            key=lambda k: k['birth_order'] if 'birth_order' in k else 1000000)
+
+    # if focal person's parents aren't in the database, we have to
+    # adjust the graphical tree properly since their data isn't nested
+    # under their parents
+    if len(parents) == 0:
+        treegraph = tree_focal
+    else:
+        treegraph["marriages"][0]["children"][focal_birth_order] = tree_focal
+
+
+    # add data formatted for the graphical tree
+    data["treegraph"] = json.dumps([treegraph])
 
     # special cases with extended notes about the early family members
     extended = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
@@ -301,6 +376,25 @@ def create_life_span(record):
     else:
         string += " - ?)"
     return string
+
+def get_children_of_parents(pid1, pid2):
+    return graph.run("MATCH (parent1:Person { id: {id1} })-[:PARENT_OF]->(child:Person)<-[:PARENT_OF]-(parent2:Person { id: {id2} }) \
+    RETURN child.id AS id, \
+        child.first_name AS first_name, \
+        child.nickname AS nickname, \
+        child.middle_name1 AS middle_name1, \
+        child.middle_name2 AS middle_name2, \
+        child.last_name AS last_name, \
+        child.pref_name AS pref_name, \
+        child.gender AS gender, \
+        child.birth_month AS birth_month, \
+        child.birth_day AS birth_day, \
+        child.birth_year AS birth_year, \
+        child.death_month AS death_month, \
+        child.death_day AS death_day, \
+        child.death_year AS death_year, \
+        child.birth_order AS order \
+    ORDER BY child.birth_order", {'id1': pid1, 'id2': pid2}).data()
 
 
 if __name__ == "__main__":

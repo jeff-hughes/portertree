@@ -1,3 +1,4 @@
+{% set load_treegraph = True %}
 {% extends "base.html" %}
 
 {% block title %}{{ data.focus.display_name | safe }}{% endblock %}
@@ -19,7 +20,7 @@
         <h3>Parent{% if data.parents | length > 1 %}s{% endif %}</h3>
         <ul>
             {% for p in data.parents %} 
-                <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }}</a></li> 
+                <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }} {{ p.life_span }}</a></li> 
             {% endfor %}
         </ul>
     {% endif %}
@@ -39,4 +40,42 @@
             {% endfor %}
         </ul>
     {% endif %}
+    <div class="treegraph"></div>
+    <script>
+        data = {{ data.treegraph | safe }};
+        options = {
+          target: ".treegraph",
+          debug: true,
+          height: 300,
+          width: 800,
+          nodeWidth: 200,
+          callbacks: {
+            nodeClick: function(name, extra) {
+              console.log(name);
+            },
+            textRenderer: function(name, extra, textClass) {
+                // THis callback is optinal but can be used to customize
+              // how the text is rendered without having to rewrite the entire node
+              // from screatch.
+                if (extra && extra.nickname)
+                  name = name + " (" + extra.nickname + ")";
+                return "<p align='center' class='" + textClass + "'>" + name + "</p>";
+            },
+            nodeRenderer: function(name, x, y, height, width, extra, id, nodeClass, textClass, textRenderer) {
+              // This callback is optional but can be used to customize the
+              // node element using HTML.
+              let node = '';
+              node += '<div ';
+              node += 'class="node ' + nodeClass + '" ';
+              node += 'id="node' + id + '">\n';
+              node += textRenderer(name, extra, textClass);
+              node += '</div>';
+              return node;
+          }
+          }
+        };
+        window.onload = function() {
+            tree = dTree.init(data, options);
+        };
+    </script>
 {% endblock %}
