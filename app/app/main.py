@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
+GENDER_MAP = { "M": "man", "F": "woman" }
 
 graph = Graph(host='neo4j', auth=(os.environ["NEO4J_USERNAME"],
                                   os.environ["NEO4J_PASSWORD"]))
@@ -120,17 +121,8 @@ def adv_search():
 @app.route('/p/<pid>')
 def person_page(pid):
     data = {}
-    gender_dict = { "M": "man", "F": "woman" }
-
     p = matcher.match("Person", id=pid).first()
-    data["focus"] = dict(p)
-    data["focus"]["display_name"] = create_display_name(p)
-    data["focus"]["name"] = create_short_name(p)
-    data["focus"]["life_span"] = create_life_span(p)
-    if is_attr(data["focus"], "gender") and data["focus"]["gender"] in gender_dict:
-        data["focus"]["class"] = gender_dict[data["focus"]["gender"]]
-    data["focus"]["textClass"] = "emphasis"
-    data["focus"]["extra"] = { "url": url_for("person_page", pid=data["focus"]["id"]) }
+    data["focus"] = format_person_data(p, emphasis=True)
 
     # get info on focal person's parents
     data["parents"] = []
@@ -141,13 +133,7 @@ def person_page(pid):
         focal_birth_order = None
         for pr in parents:
             graph.pull(pr.start_node)
-            pr_dict = dict(pr.start_node)
-            pr_dict["display_name"] = create_display_name(pr.start_node)
-            pr_dict["name"] = create_short_name(pr.start_node)
-            pr_dict["life_span"] = create_life_span(pr.start_node)
-            if is_attr(pr_dict, "gender") and pr_dict["gender"] in gender_dict:
-                pr_dict["class"] = gender_dict[pr_dict["gender"]]
-            pr_dict["extra"] = { "url": url_for("person_page", pid=pr_dict["id"]) }
+            pr_dict = format_person_data(pr.start_node)
 
             if pr_dict["in_tree"]:
                 parent_ids[0] = pr_dict["id"]
@@ -165,45 +151,27 @@ def person_page(pid):
                 data["siblings"].append(data["focus"])
                 focal_birth_order = i
             else:
-                sib_dict = dict(sib)
-                sib_dict["display_name"] = create_display_name(sib)
-                sib_dict["name"] = create_short_name(sib)
-                sib_dict["life_span"] = create_life_span(sib)
-                if is_attr(sib, "gender") and sib["gender"] in gender_dict:
-                    sib_dict["class"] = gender_dict[sib["gender"]]
-                sib_dict["extra"] = { "url": url_for("person_page", pid=sib["id"]) }
+                sib_dict = format_person_data(sib)
                 data["siblings"].append(sib_dict)
 
     # get info on focal person's spouse(s)
     data["marriages"] = []
     spouses = graph.match(set((p, )), r_type="MARRIED_TO").order_by("_.marriage_order")
     for i, s in enumerate(spouses):
+        marriage = dict(s)
         if data["focus"]["in_tree"]:
             node = s.end_node
         else:
             node = s.start_node
         graph.pull(node)
-        s_dict = dict(node)
-
-        s_dict["display_name"] = create_display_name(node)
-        s_dict["name"] = create_short_name(node)
-        s_dict["life_span"] = create_life_span(node)
-        if is_attr(s_dict, "gender") and s_dict["gender"] in gender_dict:
-            s_dict["class"] = gender_dict[s_dict["gender"]]
-        s_dict["extra"] = { "url": url_for("person_page", pid=s_dict["id"]) }
-
-        data["marriages"].append({ "spouse": s_dict })
+        s_dict = format_person_data(node)
+        marriage["spouse"] = s_dict
+        data["marriages"].append(marriage)
 
         children = get_children_of_parents(pid, s_dict["id"])
         s_children = []
         for c in children:
-            c_dict = dict(c)
-            c_dict["display_name"] = create_display_name(c)
-            c_dict["name"] = create_short_name(c)
-            c_dict["life_span"] = create_life_span(c)
-            if is_attr(c, "gender") and c["gender"] in gender_dict:
-                c_dict["class"] = gender_dict[c["gender"]]
-            c_dict["extra"] = { "url": url_for("person_page", pid=c["id"]) }
+            c_dict = format_person_data(c)
             s_children.append(c_dict)
 
         data["marriages"][i]["children"] = s_children
@@ -305,6 +273,21 @@ def birthdate_sorter(record):
             except ValueError:
                 day = 1000000  # sort to end
     return (year, month, day)
+
+def format_person_data(record, emphasis=False):
+    output = dict(record)
+    output["display_name"] = create_display_name(record)
+    output["life_span"] = create_life_span(record)
+
+    # used in graphical tree
+    output["name"] = create_short_name(record)
+    if is_attr(output, "gender") and output["gender"] in GENDER_MAP:
+        output["class"] = GENDER_MAP[output["gender"]]
+    output["extra"] = { "url": url_for("person_page", pid=output["id"]) }
+    
+    if emphasis:
+        output["textClass"] = "emphasis"
+    return output
 
 def create_display_name(record):
     name = ""
