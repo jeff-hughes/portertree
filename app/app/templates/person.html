@@ -24,11 +24,20 @@
             {% endfor %}
         </ul>
     {% endif %}
-    {% if data.spouses | length > 0 %}
-        <h3>Spouse{% if data.spouses | length > 1 %}s{% endif %}</h3>
+    {% if data.marriages | length > 0 %}
+        <h3>Marriage{% if data.marriages | length > 1 %}s{% endif %}</h3>
         <ul>
-            {% for s in data.spouses %} 
-                <li><a href="{{ url_for('person_page', pid=s.id) }}">{{ s.display_name | safe }} {{ s.life_span }}</a></li> 
+            {% for m in data.marriages %} 
+                <li>
+                    <a href="{{ url_for('person_page', pid=m.spouse.id) }}">{{ m.spouse.display_name | safe }} {{ m.spouse.life_span }}</a>
+                    {% if m.children | length > 0 %}
+                        <ul>
+                            {% for c in m.children %}
+                                <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }} {{ c.life_span }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
     {% endif %}

@@ -16,7 +16,7 @@ if (typeof tree_height === "undefined") {
     tree_height = 300;
 }
 if (typeof tree_nodeWidth === "undefined") {
-    tree_nodeWidth = 200;
+    tree_nodeWidth = 150;
 }
 
 tree_options = {
