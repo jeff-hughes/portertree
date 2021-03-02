@@ -141,7 +141,7 @@ body.index .additional_container {
     margin: 0 auto;
 }
 
-body.index #additional-materials {
+body.index #additional_materials {
     margin: 3em 0 0;
     line-height: 1.8em;
 }
@@ -172,6 +172,41 @@ body.index #index_footer li {
 
 body.index footer {
     display: none;
+}
+
+body.person dl {
+    display: table;
+}
+
+body.person dl .dl_row {
+    display: table-row;
+}
+
+body.person dt {
+    display: table-cell;
+    font-weight: bold;
+    padding: 0 15px 15px 0;
+}
+
+body.person dd {
+    display: table-cell;
+}
+
+body.person dd ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+body.person dd .children_header {
+    font-size: 100%;
+    font-style: italic;
+    font-weight: normal;
+    margin: -0.5em 0 0;
+    padding-left: 2em;
+}
+
+body.person dd .children_list {
+    padding-left: 2em;
 }
 
 body.adv_search form {

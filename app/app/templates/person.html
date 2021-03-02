@@ -8,47 +8,51 @@
 {% block content %}
     <h2>{{ data.focus.display_name | safe }} {{ data.focus.life_span }}</h2>
     <dl>
-        <dt>Birth: </dt><dd>{{ data.focus.birth_month or '?' }} {{ data.focus.birth_day or '?' }}, {{ data.focus.birth_year or '?' }}{% if data.focus.birth_place %}; {{ data.focus.birth_place }}{% endif %}</dd>
-        {% if data.focus.death_month is not undefined or data.focus.death_day is not undefined or data.focus.death_year is not undefined or data.focus.death_place is not undefined %}
-            <dt>Death: </dt><dd>{{ data.focus.death_month or '?' }} {{ data.focus.death_day or '?' }}, {{ data.focus.death_year or '?' }}{% if data.focus.death_place %}; {{ data.focus.death_place }}{% endif %}</dd>
-        {% endif %}
-        {% if data.focus.buried %}<dt>Buried: </dt><dd>{{ data.focus.buried }}</dd>{% endif %}
-        {% if data.focus.additional_notes %}<dt>Notes: </dt><dd>{{ data.focus.additional_notes }}</dd>{% endif %}
-    </dl>
+        <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focus.birth_date }}{% if data.focus.birth_place %}; {{ data.focus.birth_place }}{% endif %}</dd></div>
 
-    {% if data.parents | length > 0 %}
-        <h3>Parent{% if data.parents | length > 1 %}s{% endif %}</h3>
-        <ul>
-            {% for p in data.parents %} 
-                <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }} {{ p.life_span }}</a></li> 
-            {% endfor %}
-        </ul>
-    {% endif %}
-    {% if data.marriages | length > 0 %}
-        <h3>Marriage{% if data.marriages | length > 1 %}s{% endif %}</h3>
-        <ul>
-            {% for m in data.marriages %} 
-                <li>
-                    <a href="{{ url_for('person_page', pid=m.spouse.id) }}">{{ m.spouse.display_name | safe }} {{ m.spouse.life_span }}</a>
-                    {% if m.children | length > 0 %}
-                        <ul>
+        {% if data.focus.death_date is not undefined or data.focus.death_place is not undefined %}
+            <div class="dl_row"><dt>Death:</dt><dd>{{ data.focus.death_date }}{% if data.focus.death_place %}; {{ data.focus.death_place }}{% endif %}</dd></div>
+        {% endif %}
+
+        {% if data.focus.buried %}<div class="dl_row"><dt>Buried:</dt><dd>{{ data.focus.buried }}</dd></div>{% endif %}
+
+        {% if data.focus.additional_notes %}<div class="dl_row"><dt>Notes:</dt><dd>{{ data.focus.additional_notes }}</dd></div>{% endif %}
+
+        {% if data.parents | length > 0 %}
+        <div class="dl_row">
+            <dt>Parent{% if data.parents | length > 1 %}s{% endif %}:</dt>
+            <dd>
+                <ul>
+                {% for p in data.parents %} 
+                    <li><a href="{{ url_for('person_page', pid=p.id) }}">{{ p.display_name | safe }} {{ p.life_span }}</a></li> 
+                {% endfor %}
+                </ul>
+            </dd>
+        </div>
+        {% endif %}
+        {% if data.marriages | length > 0 %}
+        <div class="dl_row">
+            <dt>Marriage{% if data.marriages | length > 1 %}s{% endif %}:</dt>
+            <dd>
+                <ul>
+                {% for m in data.marriages %} 
+                    <li>
+                        <p>Married {% if m.marriage_date %}{{ m.marriage_date }},{% endif %}{% if m.place %} in {{ m.place }},{% endif %} to <a href="{{ url_for('person_page', pid=m.spouse.id) }}">{{ m.spouse.display_name | safe }} {{ m.spouse.life_span }}</a>{% if m.divorced %}; Divorced{% if m.divorced_date %} {{ m.divorced_date }}{% endif %}{% endif %}</p>
+                        {% if m.children | length > 0 %}
+                        <h3 class="children_header">Children:</h3>
+                        <ul class="children_list">
                             {% for c in m.children %}
                                 <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }} {{ c.life_span }}</a></li>
                             {% endfor %}
                         </ul>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    {% if data.children | length > 0 %}
-        <h3>Child{% if data.children | length > 1 %}ren{% endif %}</h3>
-        <ul>
-            {% for c in data.children %} 
-                <li><a href="{{ url_for('person_page', pid=c.id) }}">{{ c.display_name | safe }} {{ c.life_span }}</a></li> 
-            {% endfor %}
-        </ul>
-    {% endif %}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </dd>
+        </div>
+        {% endif %}
+    </dl>
     <div class="treegraph"></div>
     <script>
         tree_data = {{ data.treegraph | safe }};

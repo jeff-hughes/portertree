@@ -18,58 +18,6 @@ matcher = NodeMatcher(graph)
 
 @app.route('/')
 def index():
-    # records = graph.run("MATCH (child:Person)<-[:PARENT_OF]-(parent:Person { id: {id} }) \
-    #     RETURN child.first_name AS first_name, \
-    #         child.nickname AS nickname, \
-    #         child.middle_name1 AS middle_name1, \
-    #         child.middle_name2 AS middle_name2, \
-    #         child.last_name AS last_name, \
-    #         child.pref_name AS pref_name, \
-    #         child.gender AS gender, \
-    #         child.birth_month AS birth_month, \
-    #         child.birth_day AS birth_day, \
-    #         child.birth_year AS birth_year, \
-    #         child.birth_place AS birth_place, \
-    #         child.death_month AS death_month, \
-    #         child.death_day AS death_day, \
-    #         child.death_year AS death_year, \
-    #         child.death_place AS death_place, \
-    #         child.buried AS buried, \
-    #         child.additional_notes AS additional_notes, \
-    #         child.birth_order AS order \
-    #     ORDER BY child.birth_order", {'id': '1'}).data()
-    # string = ""
-    # for record in records:
-    #     # name data
-    #     string = "{} {}".format(string, record['first_name'])
-    #     if is_attr(record, 'nickname'):
-    #         string = "{} ({})".format(string, record['nickname'])
-    #     if is_attr(record, 'middle_name1'):
-    #         if record['pref_name'] == 'M1':
-    #             string = "{} <u>{}</u>".format(string, record['middle_name1'])
-    #         else:
-    #             string = "{} {}".format(string, record['middle_name1'])
-    #     if is_attr(record, 'middle_name2'):
-    #         if record['pref_name'] == 'M2':
-    #             string = "{} <u>{}</u>".format(string, record['middle_name2'])
-    #         else:
-    #             string = "{} {}".format(string, record['middle_name2'])
-    #     string = "{} {}".format(string, record['last_name'])
-
-    #     # birth and death years
-    #     if is_attr(record, 'birth_year'):
-    #         string = "{} ({}".format(string, record['birth_year'])
-    #     else:
-    #         string = "{} (? ".format(string)
-
-    #     if is_attr(record, 'death_year'):
-    #         string = "{} - {})<br>".format(string, record['death_year'])
-    #     elif is_attr(record, 'birth_year') and int(record['birth_year']) >= (2019-100):
-    #         string = "{} - present)<br>".format(string)
-    #         # assume the best if someone is less than 100 years old :)
-    #     else:
-    #         string = "{} - ?)<br>".format(string)
-    # return string
     return render_template("index.html")
 
 
@@ -156,9 +104,14 @@ def person_page(pid):
 
     # get info on focal person's spouse(s)
     data["marriages"] = []
-    spouses = graph.match(set((p, )), r_type="MARRIED_TO").order_by("_.marriage_order")
+    spouses = graph.match(set((p, )), r_type="MARRIED_TO").order_by("_.order")
     for i, s in enumerate(spouses):
         marriage = dict(s)
+
+        marriage["marriage_date"] = format_date(marriage, "day", "month", "year")
+        if is_attr(marriage, "divorced") and marriage["divorced"]:
+            marriage["divorced_date"] = format_date(marriage, "divorced_day", "divorced_month", "divorced_year")
+
         if data["focus"]["in_tree"]:
             node = s.end_node
         else:
@@ -279,6 +232,10 @@ def format_person_data(record, emphasis=False):
     output["display_name"] = create_display_name(record)
     output["life_span"] = create_life_span(record)
 
+    output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
+    output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
+
+
     # used in graphical tree
     output["name"] = create_short_name(record)
     if is_attr(output, "gender") and output["gender"] in GENDER_MAP:
@@ -343,6 +300,29 @@ def create_life_span(record):
         # assume the best if someone is less than 100 years old :)
     else:
         string += " - ?)"
+    return string
+
+def format_date(record, day, month, year, all_blanks=False):
+    string = ""
+    if is_attr(record, day):
+        if is_attr(record, month):
+            string += f"{record[month]} {record[day]}"
+        else:
+            string += f"_____ {record[day]}"
+    elif is_attr(record, month):
+        if all_blanks:
+            string += f"{record[month]} __"
+        else:
+            string += record[month]
+    elif all_blanks:
+        string += "_____ __"
+    if is_attr(record, year):
+        if string != "":
+            string += ", " + record[year]
+        else:
+            string += record[year]
+    elif all_blanks:
+        string += ", ____"
     return string
 
 def get_children_of_parents(pid1, pid2):
