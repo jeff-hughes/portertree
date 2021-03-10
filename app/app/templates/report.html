@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Report an Update/Error{% endblock %}
+
+{% block body_class %}report{% endblock %}
+
+{% block content %}
+    <h2>Report an Update/Error</h2>
+    <p>
+        If you are aware of any errors with the information provided for a person, or you have updates to share (births, deaths, marriages, divorces, etc.), please use the contact form below to let me know! <strong>Please be as specific as possible.</strong>
+    </p>
+    <form method="POST" action="{{ url_for('report') }}">
+        <fieldset>
+            <legend>Details about Error/Update</legend>
+            <p>If this information is about a person currently in the database, please provide the URL of the person's page.
+            <label for="url">URL of person:</label>
+            <input type="text" id="url" name="url" />
+
+            <label for="details">Details:</label>
+            <textarea id="details" name="details"></textarea>
+            <p>Please be specific and detailed!</p>
+        </fieldset>
+        <fieldset>
+            <legend>Your Contact Info</legend>
+            <label for="name">Your name:</label>
+            <input type="text" id="name" name="name" />
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" />
+            <p>Note: This information will <em>only</em> be used if I need to contact you for clarification about the information you have provided.</p>
+        </fieldset>
+        <button type="submit">Search</button>
+    </form>
+{% endblock %}

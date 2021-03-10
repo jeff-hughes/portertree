@@ -180,6 +180,14 @@ def technical_details():
     return render_template("technical_details.html")
 
 
+@app.route('/report', methods=['POST'])
+def report():
+    if len(request.args) > 0:
+        return render_template("report.html")
+    else:
+        return render_template("report.html")
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     # note that we set the 404 status explicitly
