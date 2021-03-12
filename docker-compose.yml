@@ -3,14 +3,11 @@ version: '3.5'
 services:
     db:
         build: ./db
-        container_name: neo4j
         restart: always
         ports:
-            - 7474:7474
-            - 7687:7687
+            - 5432:5432
         volumes:
-            - neo4j-data:/data
-            - neo4j-logs:/logs
+            - pgdata:/var/lib/postgresql/data
         env_file: .env
         networks:
             - porter
@@ -19,7 +16,6 @@ services:
         build:
             context: ./app
             target: dev
-        container_name: portertree
         restart: always
         ports:
             - 8080:80
@@ -32,13 +28,7 @@ services:
             - porter
 
 volumes:
-    neo4j-data:
-    neo4j-logs:
+    pgdata:
 
 networks:
     porter:
-
-# .env file needs to contain:
-# NEO4J_USERNAME=aaaaa
-# NEO4J_PASSWORD=bbbbb
-# NEO4J_AUTH=aaaaa/bbbbb

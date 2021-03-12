@@ -1,8 +1,6 @@
-FROM neo4j:3.5.9
+FROM postgres:13.2-alpine
 
-COPY ./*.csv /var/lib/neo4j/import/
-
-# load_data.sh must be run after container starts and db has loaded
-COPY ./load_data.sh /var/lib/neo4j/load_data.sh
-WORKDIR /var/lib/neo4j
-RUN chmod +x load_data.sh
+COPY ./*.csv /csv_data/
+COPY ./load_data.sql /docker-entrypoint-initdb.d/load_data.sql
+    # files in the initdb directory are run on initialization, if
+    # the data directory is empty (i.e., first time only)

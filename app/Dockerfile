@@ -2,6 +2,9 @@ FROM tiangolo/uwsgi-nginx:python3.7 as base
 
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
+RUN apt-get update \
+    && apt-get -y install python3-dev
+
 COPY ./requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
