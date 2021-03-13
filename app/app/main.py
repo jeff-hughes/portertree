@@ -175,7 +175,9 @@ def birthdate_sorter(record):
     """Function for use in sorted(), to sort birthdates in chronological
     order. Returns a tuple of (year, month, day).
     """
-    year, month, day = (None, None, None)
+    # in case of unknown values, 1000000 will ensure they are sorted
+    # to the end
+    year, month, day = (1000000, 1000000, 1000000)
     if "birth_year" in record and record["birth_year"] is not None:
         try:
             # if year is integer, great
@@ -185,14 +187,14 @@ def birthdate_sorter(record):
                 # this should handle cases like "1945?" and
                 # "1945 or 1946"
                 year = int(record["birth_year"][0:4])
-            except ValueError:
-                year = 1000000  # sort to end
+            except:
+                pass
 
     if "birth_month" in record and record["birth_month"] is not None:
         try:
             month = MONTHS.index(record["birth_month"]) + 1
-        except ValueError:
-            month = 1000000  # sort to end
+        except:
+            pass
     
     if "birth_day" in record and record["birth_day"] is not None:
         try:
@@ -200,8 +202,8 @@ def birthdate_sorter(record):
         except ValueError:
             try:
                 day = int(record["birth_day"][0:2])
-            except ValueError:
-                day = 1000000  # sort to end
+            except:
+                pass
     return (year, month, day)
 
 def format_person_data(record, emphasis=False):
