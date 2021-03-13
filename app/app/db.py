@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import psycopg2
 
 PERSON_COLS = ("id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes")
-MARRIAGE_COLS = ("pid1", "pid2", "marriage_order", "month", "day", "year", "place", "divorced", "divorced_month", "divorced_day", "divorced_year")
+MARRIAGE_COLS = ("pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year")
 
 class DBConnect():
     def __init__(self):
@@ -92,9 +92,10 @@ class DBConnect():
                 p.gender, p.birth_month, p.birth_day, p.birth_year,
                 p.birth_place, p.death_month, p.death_day, p.death_year,
                 p.death_place, p.buried, p.additional_notes,
-                m.pid1, m.pid2, m.marriage_order, m.month, m.day,
-                m.year, m.place, m.divorced, m.divorced_month,
-                m.divorced_day, m.divorced_year
+                m.pid1, m.pid2, m.marriage_order, m.married_month,
+                m.married_day, m.married_year, m.married_place,
+                m.divorced, m.divorced_month, m.divorced_day,
+                m.divorced_year
             FROM marriages m
             LEFT JOIN people p ON m.{joinid} = p.id
             WHERE m.{matchid} = %s

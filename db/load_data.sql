@@ -1,57 +1,54 @@
 CREATE TABLE people (
-    id VARCHAR(50) PRIMARY KEY,
-    print_id VARCHAR(50),
+    id TEXT PRIMARY KEY,
+    print_id TEXT,
     in_tree BOOLEAN NOT NULL,
-    first_name VARCHAR(100),
-    nickname VARCHAR(100),
-    middle_name1 VARCHAR(100),
-    middle_name2 VARCHAR(100),
-    last_name VARCHAR(100),
+    first_name TEXT,
+    nickname TEXT,
+    middle_name1 TEXT,
+    middle_name2 TEXT,
+    last_name TEXT,
     pref_name CHAR(2),
     gender CHAR(1),
-    birth_month CHAR(9),
+    birth_month TEXT,
     birth_day INTEGER,
-    birth_year VARCHAR(50),
-    birth_place VARCHAR(100),
-    death_month CHAR(9),
+    birth_year TEXT,
+    birth_place TEXT,
+    death_month TEXT,
     death_day INTEGER,
-    death_year VARCHAR(50),
-    death_place VARCHAR(100),
-    buried VARCHAR(100),
-    additional_notes TEXT,
-    birth_order INTEGER
+    death_year TEXT,
+    death_place TEXT,
+    buried TEXT,
+    additional_notes TEXT
 );
 
 CREATE TABLE marriages (
-    id serial PRIMARY KEY,
-    mid VARCHAR(50) UNIQUE NOT NULL,
-    pid1 VARCHAR(50) NOT NULL,
-    pid2 VARCHAR(50) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    pid1 TEXT NOT NULL,
+    pid2 TEXT NOT NULL,
     marriage_order INTEGER,
-    month CHAR(9),
-    day INTEGER,
-    year VARCHAR(50),
-    place VARCHAR(100),
+    married_month TEXT,
+    married_day INTEGER,
+    married_year TEXT,
+    married_place TEXT,
     divorced BOOLEAN,
-    divorced_month CHAR(9),
+    divorced_month TEXT,
     divorced_day INTEGER,
-    divorced_year VARCHAR(50),
+    divorced_year TEXT,
     FOREIGN KEY (pid1) REFERENCES people (id),
     FOREIGN KEY (pid2) REFERENCES people (id)
 );
 
 CREATE TABLE children (
-    id serial PRIMARY KEY,
-    rel_id VARCHAR(50) UNIQUE NOT NULL,
-    pid VARCHAR(50) NOT NULL,
-    cid VARCHAR(50) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    pid TEXT NOT NULL,
+    cid TEXT NOT NULL,
     birth_order INTEGER,
     FOREIGN KEY (pid) REFERENCES people (id),
     FOREIGN KEY (cid) REFERENCES people (id)
 );
 
-COPY people (id, print_id, in_tree, first_name, nickname, middle_name1, middle_name2, last_name, pref_name, gender, birth_month, birth_day, birth_year, birth_place, death_month, death_day, death_year, death_place, buried, additional_notes, birth_order) FROM '/csv_data/people.csv' CSV HEADER;
+COPY people (id, print_id, in_tree, first_name, nickname, middle_name1, middle_name2, last_name, pref_name, gender, birth_month, birth_day, birth_year, birth_place, death_month, death_day, death_year, death_place, buried, additional_notes) FROM '/data_imports/people.csv' CSV HEADER;
 
-COPY marriages (mid, pid1, pid2, marriage_order, month, day, year, place, divorced, divorced_month, divorced_day, divorced_year) FROM '/csv_data/marriages.csv' CSV HEADER;
+COPY marriages (pid1, pid2, marriage_order, married_month, married_day, married_year, married_place, divorced, divorced_month, divorced_day, divorced_year) FROM '/data_imports/marriages.csv' CSV HEADER;
 
-COPY children (rel_id, birth_order, pid, cid) FROM '/csv_data/children.csv' CSV HEADER;
+COPY children (pid, cid, birth_order) FROM '/data_imports/children.csv' CSV HEADER;

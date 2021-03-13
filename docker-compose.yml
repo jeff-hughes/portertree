@@ -8,6 +8,7 @@ services:
             - 5432:5432
         volumes:
             - pgdata:/var/lib/postgresql/data
+            - csvdata:/data_exports
         env_file: .env
         networks:
             - porter
@@ -21,6 +22,7 @@ services:
             - 8080:80
         volumes:
             - ./app/app:/app
+            - csvdata:/csv_data
         env_file: .env
         environment:
             POSTGRES_HOST: db
@@ -32,6 +34,7 @@ services:
 
 volumes:
     pgdata:
+    csvdata:
 
 networks:
     porter:
