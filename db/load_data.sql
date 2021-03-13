@@ -36,8 +36,8 @@ CREATE TABLE marriages (
     divorced_month CHAR(9),
     divorced_day INTEGER,
     divorced_year VARCHAR(50),
-    FOREIGN KEY (pid1) REFERENCES people (pid),
-    FOREIGN KEY (pid2) REFERENCES people (pid)
+    FOREIGN KEY (pid1) REFERENCES people (id),
+    FOREIGN KEY (pid2) REFERENCES people (id)
 );
 
 CREATE TABLE children (
@@ -46,8 +46,8 @@ CREATE TABLE children (
     pid VARCHAR(50) NOT NULL,
     cid VARCHAR(50) NOT NULL,
     birth_order INTEGER,
-    FOREIGN KEY (pid) REFERENCES people (pid),
-    FOREIGN KEY (cid) REFERENCES people (pid)
+    FOREIGN KEY (pid) REFERENCES people (id),
+    FOREIGN KEY (cid) REFERENCES people (id)
 );
 
 COPY people (id, print_id, in_tree, first_name, nickname, middle_name1, middle_name2, last_name, pref_name, gender, birth_month, birth_day, birth_year, birth_place, death_month, death_day, death_year, death_place, buried, additional_notes, birth_order) FROM '/csv_data/people.csv' CSV HEADER;

@@ -1,22 +1,22 @@
 {% set load_treegraph = True %}
 {% extends "base.html" %}
 
-{% block title %}{{ data.focus.display_name | safe }}{% endblock %}
+{% block title %}{{ data.focal.display_name | safe }}{% endblock %}
 
 {% block body_class %}person{% endblock %}
 
 {% block content %}
-    <h2>{{ data.focus.display_name | safe }} {{ data.focus.life_span }}</h2>
+    <h2>{{ data.focal.display_name | safe }} {{ data.focal.life_span }}</h2>
     <dl>
-        <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focus.birth_date }}{% if data.focus.birth_place %}; {{ data.focus.birth_place }}{% endif %}</dd></div>
+        <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focal.birth_date }}{% if data.focal.birth_place %}; {{ data.focal.birth_place }}{% endif %}</dd></div>
 
-        {% if data.focus.death_date is not undefined or data.focus.death_place is not undefined %}
-            <div class="dl_row"><dt>Death:</dt><dd>{{ data.focus.death_date }}{% if data.focus.death_place %}; {{ data.focus.death_place }}{% endif %}</dd></div>
+        {% if data.focal.death_date is not undefined or data.focal.death_place is not undefined %}
+            <div class="dl_row"><dt>Death:</dt><dd>{{ data.focal.death_date }}{% if data.focal.death_place %}; {{ data.focal.death_place }}{% endif %}</dd></div>
         {% endif %}
 
-        {% if data.focus.buried %}<div class="dl_row"><dt>Buried:</dt><dd>{{ data.focus.buried }}</dd></div>{% endif %}
+        {% if data.focal.buried %}<div class="dl_row"><dt>Buried:</dt><dd>{{ data.focal.buried }}</dd></div>{% endif %}
 
-        {% if data.focus.additional_notes %}<div class="dl_row"><dt>Notes:</dt><dd>{{ data.focus.additional_notes }}</dd></div>{% endif %}
+        {% if data.focal.additional_notes %}<div class="dl_row"><dt>Notes:</dt><dd>{{ data.focal.additional_notes }}</dd></div>{% endif %}
 
         {% if data.parents | length > 0 %}
         <div class="dl_row">

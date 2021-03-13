@@ -1,19 +1,17 @@
 import json
 import os
 
-from py2neo import Graph, NodeMatcher
-
 #from app import app
 from flask import Flask, render_template, request, url_for
 app = Flask(__name__)
+
+from db import DBConnect
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 GENDER_MAP = { "M": "man", "F": "woman" }
 
-graph = Graph(host='neo4j', auth=(os.environ["NEO4J_USERNAME"],
-                                  os.environ["NEO4J_PASSWORD"]))
-matcher = NodeMatcher(graph)
+db = DBConnect()
 
 
 @app.route('/')
@@ -25,15 +23,8 @@ def index():
 def search():
     if len(request.args) > 0:
         terms = request.args.get("search", "").split()
-        match_args = []
-        for t in terms:
-            # case insensitive matching for each space-separated term
-            # in the query
-            match_args.append(f"(_.first_name =~ '(?i).*{t}.*' OR _.nickname =~ '(?i).*{t}.*' OR _.middle_name1 =~ '(?i).*{t}.*' OR _.middle_name2 =~ '(?i).*{t}.*' OR _.last_name =~ '(?i).*{t}.*')")
-        # apparently using multiple `where()` methods results in an
-        # implicit "OR", so we're joining the queries together into one
-        # big statement instead
-        res = list(matcher.match("Person").where(" AND ".join(match_args)).order_by("_.birth_year"))
+        res = db.search_name(terms)
+        res = sorted(res, key=birthdate_sorter)
         for r in res:
             r["display_name"] = create_display_name(r)
             r["life_span"] = create_life_span(r)
@@ -45,19 +36,8 @@ def search():
 @app.route('/advsearch', methods=['GET'])
 def adv_search():
     if len(request.args) > 0:
-        match_args = {}
-        for k, v in request.args.items():
-            if v != "":
-                # suffix provides details to Neo4j about search type
-                if k == "middle_name":
-                    match_args["middle_name1__contains"] = v
-                    match_args["middle_name2__contains"] = v
-                elif "name" in k or k == "buried" or k == "additional_notes":
-                    match_args[k + "__contains"] = v
-                else:
-                    match_args[k + "__exact"] = v
-        
-        res = list(matcher.match("Person", **match_args).order_by("_.birth_year"))
+        res = db.search_advanced(request.args)
+        res = sorted(res, key=birthdate_sorter)
         for r in res:
             r["display_name"] = create_display_name(r)
             r["life_span"] = create_life_span(r)
@@ -69,34 +49,29 @@ def adv_search():
 @app.route('/p/<pid>')
 def person_page(pid):
     data = {}
-    p = matcher.match("Person", id=pid).first()
-    data["focus"] = format_person_data(p, emphasis=True)
+    p = db.get_person(pid)
+    data["focal"] = format_person_data(p, emphasis=True)
 
     # get info on focal person's parents
     data["parents"] = []
-    parent_ids = [None, None]
-    parents = graph.match((None, p), r_type="PARENT_OF")
+    parent_ids = []
+    parents = db.get_parents(pid)
 
     if len(parents) > 0:
         focal_birth_order = None
         for pr in parents:
-            graph.pull(pr.start_node)
-            pr_dict = format_person_data(pr.start_node)
-
-            if pr_dict["in_tree"]:
-                parent_ids[0] = pr_dict["id"]
-            else:
-                parent_ids[1] = pr_dict["id"]
+            pr_dict = format_person_data(pr)
+            parent_ids.append(pr_dict["id"])
             data["parents"].append(pr_dict)
 
         data["parents"] = sorted(data["parents"], key=birthdate_sorter)
 
         # get info on focal person's siblings
-        siblings = get_children_of_parents(parent_ids[0], parent_ids[1])
+        siblings = db.get_children(parent_ids[0], parent_ids[1])
         data["siblings"] = []
         for i, sib in enumerate(siblings):
             if sib["id"] == pid:
-                data["siblings"].append(data["focus"])
+                data["siblings"].append(data["focal"])
                 focal_birth_order = i
             else:
                 sib_dict = format_person_data(sib)
@@ -104,36 +79,30 @@ def person_page(pid):
 
     # get info on focal person's spouse(s)
     data["marriages"] = []
-    spouses = graph.match(set((p, )), r_type="MARRIED_TO").order_by("_.order")
-    for i, s in enumerate(spouses):
-        marriage = dict(s)
+    marriages = db.get_marriages(pid, p["in_tree"])
+    for m in marriages:
+        marriage = m["marriage"]
 
         marriage["marriage_date"] = format_date(marriage, "day", "month", "year")
         if is_attr(marriage, "divorced") and marriage["divorced"]:
             marriage["divorced_date"] = format_date(marriage, "divorced_day", "divorced_month", "divorced_year")
 
-        if data["focus"]["in_tree"]:
-            node = s.end_node
-        else:
-            node = s.start_node
-        graph.pull(node)
-        s_dict = format_person_data(node)
-        marriage["spouse"] = s_dict
-        data["marriages"].append(marriage)
+        spouse = format_person_data(m["spouse"])
+        marriage["spouse"] = spouse
 
-        children = get_children_of_parents(pid, s_dict["id"])
+        children = db.get_children(pid, spouse["id"])
         s_children = []
         for c in children:
-            c_dict = format_person_data(c)
-            s_children.append(c_dict)
+            s_children.append(format_person_data(c))
 
-        data["marriages"][i]["children"] = s_children
+        marriage["children"] = s_children
+        data["marriages"].append(marriage)
 
     # if focal person's parents aren't in the database, we have to
     # adjust the graphical tree properly since their data isn't nested
     # under their parents
     if len(parents) == 0:
-        treegraph = data["focus"]
+        treegraph = data["focal"]
         treegraph["marriages"] = data["marriages"]
     else:
         treegraph = data["parents"][0]
@@ -149,8 +118,8 @@ def person_page(pid):
 
     # special cases with extended notes about the early family members
     extended = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
-    if data["focus"]["id"] in extended:
-        return render_template(f"extended/person{data['focus']['id']}.html", data=data)
+    if data["focal"]["id"] in extended:
+        return render_template(f"extended/person{data['focal']['id']}.html", data=data)
     else:
         return render_template("person.html", data=data)
 
@@ -243,7 +212,6 @@ def format_person_data(record, emphasis=False):
     output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
     output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
 
-
     # used in graphical tree
     output["name"] = create_short_name(record)
     if is_attr(output, "gender") and output["gender"] in GENDER_MAP:
@@ -332,25 +300,6 @@ def format_date(record, day, month, year, all_blanks=False):
     elif all_blanks:
         string += ", ____"
     return string
-
-def get_children_of_parents(pid1, pid2):
-    return graph.run("MATCH (parent1:Person { id: {id1} })-[:PARENT_OF]->(child:Person)<-[:PARENT_OF]-(parent2:Person { id: {id2} }) \
-    RETURN child.id AS id, \
-        child.first_name AS first_name, \
-        child.nickname AS nickname, \
-        child.middle_name1 AS middle_name1, \
-        child.middle_name2 AS middle_name2, \
-        child.last_name AS last_name, \
-        child.pref_name AS pref_name, \
-        child.gender AS gender, \
-        child.birth_month AS birth_month, \
-        child.birth_day AS birth_day, \
-        child.birth_year AS birth_year, \
-        child.death_month AS death_month, \
-        child.death_day AS death_day, \
-        child.death_year AS death_year, \
-        child.birth_order AS order \
-    ORDER BY child.birth_order", {'id1': pid1, 'id2': pid2}).data()
 
 
 if __name__ == "__main__":
