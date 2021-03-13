@@ -1,40 +1,40 @@
 version: '3.5'
 
 services:
-    db:
-        build: ./db
-        restart: always
-        ports:
-            - 5432:5432
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-            - csvdata:/data_exports
-        env_file: .env
-        networks:
-            - porter
+  db:
+    build: ./db
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - csvdata:/data_exports
+    env_file: .env
+    networks:
+      - porter
 
-    app:
-        build:
-            context: ./app
-            target: dev
-        restart: always
-        ports:
-            - 8080:80
-        volumes:
-            - ./app/app:/app
-            - csvdata:/csv_data
-        env_file: .env
-        environment:
-            POSTGRES_HOST: db
-            POSTGRES_PORT: 5432
-        depends_on:
-            - db
-        networks:
-            - porter
+  app:
+    build:
+      context: ./app
+      target: dev
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./app/app:/app
+      - csvdata:/csv_data
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    depends_on:
+      - db
+    networks:
+      - porter
 
 volumes:
-    pgdata:
-    csvdata:
+  pgdata:
+  csvdata:
 
 networks:
-    porter:
+  porter:
