@@ -4,8 +4,6 @@ services:
   db:
     build: ./db
     restart: always
-    ports:
-      - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
       - csvdata:/data_exports
