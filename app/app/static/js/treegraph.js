@@ -16,7 +16,7 @@ if (typeof tree_height === "undefined") {
     tree_height = 300;
 }
 if (typeof tree_nodeWidth === "undefined") {
-    tree_nodeWidth = 150;
+    tree_nodeWidth = 170;
 }
 
 tree_options = {
@@ -38,9 +38,7 @@ tree_options = {
         },
         nodeRenderer: function(name, x, y, height, width, extra, id, nodeClass, textClass, textRenderer) {
             let node = '';
-            node += '<div ';
-            node += 'class="node ' + nodeClass + '" ';
-            node += 'id="node' + id + '">\n';
+            node += '<div class="node ' + nodeClass + '" id="node' + id + '">\n';
             node += textRenderer(name, extra, textClass);
             node += '</div>';
             return node;

@@ -1,5 +1,6 @@
 .treegraph svg {
-    border: 1px #000 solid;
+    border: 1px #ccc solid;
+    border-radius: 5px;
 }
 
 .treegraph p {
@@ -10,12 +11,14 @@
 .treegraph .linage,
 .treegraph .marriage {
     fill: none;
-    stroke: #000;
+    stroke: #666;
 }
 
 .treegraph .node {
-    border: 1px #000 solid;
+    background-color: #f4f4f4;
+    border-radius: 3px;
     box-sizing: border-box;
+    font-size: 90%;
     text-align: center;
     width: 100%;
     height: 100%;
@@ -27,11 +30,11 @@
 }
 
 .treegraph .man {
-    background-color: #add8e6;
+    border-bottom: 4px #add8e6 solid;
 }
 
 .treegraph .woman {
-    background-color: #fcc0cb;
+    border-bottom: 4px #fcc0cb solid;
 }
 
 .treegraph .emphasis {
