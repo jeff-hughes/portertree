@@ -7,13 +7,33 @@
  * Kroc Camen, and the H5BP dev community and team.
  */
 
-/* ==========================================================================
+/* ======================================================================
+   Font declarations
+====================================================================== */
+
+@font-face {
+    font-family: 'EB Garamond';
+    font-style: normal;
+    font-weight: normal;
+    font-display: swap;
+    src: url(http://localhost:8080/static/css/EB_Garamond/static/EBGaramond-Regular.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'EB Garamond';
+    font-style: normal;
+    font-weight: bold;
+    font-display: swap;
+    src: url(http://localhost:8080/static/css/EB_Garamond/static/EBGaramond-Bold.ttf) format('truetype');
+}
+
+/* ======================================================================
    Base styles: opinionated defaults
-   ========================================================================== */
+====================================================================== */
 
 html {
     color: #222;
-    font-size: 1em;
+    font-size: 1.2em;
     line-height: 1.4;
 }
 
@@ -83,40 +103,46 @@ textarea {
     resize: vertical;
 }
 
-/* ==========================================================================
+/* ======================================================================
    Author's custom styles
-   ========================================================================== */
+====================================================================== */
 
 body {
+    font-family: "EB Garamond", serif;
     margin: 0 auto;
     max-width: 800px;
 }
 
-footer {
+header {
+    margin: 2em 0;
+    text-align: center;
+}
+
+footer, body.index #index_footer {
     margin-top: 5em;
     text-align: center;
 }
 
-footer ul {
+header ul, footer ul, body.index #index_footer ul {
     font-size: 90%;
     list-style: none;
     margin: 0 auto;
     padding-left: 0;
 }
 
-footer li {
+header li, footer li, body.index #index_footer li  {
     display: inline;
-    padding: 1em 1em;
+    padding: 1em;
 }
 
 body.index .focus_text {
-    margin-top: 3em;
+    margin-top: 4em;
     text-align: center;
 }
 
 body.index .start_links {
     font-size: 140%;
-    margin: 3em;
+    margin: 2.5em;
 }
 
 body.index #search {
@@ -137,12 +163,12 @@ body.index .advsearch_container {
 }
 
 body.index .additional_container {
-    width: 45%;
+    width: 40%;
     margin: 0 auto;
 }
 
 body.index #additional_materials {
-    margin: 3em 0 0;
+    margin: 2em 0 0;
     line-height: 1.8em;
 }
 
@@ -151,23 +177,6 @@ body.index #additional_list {
     margin-top: 0;
     padding-left: 0;
     line-height: 1.8em;
-}
-
-body.index #index_footer {
-    margin-top: 5em;
-    text-align: center;
-}
-
-body.index #index_footer ul {
-    font-size: 90%;
-    list-style: none;
-    margin: 0 auto;
-    padding-left: 0;
-}
-
-body.index #index_footer li {
-    display: inline;
-    padding: 1em 1em;
 }
 
 body.index footer {
@@ -329,11 +338,11 @@ body.adv_search form button {
     clear: both;
 }
 
-/* ==========================================================================
+/* ======================================================================
    EXAMPLE Media Queries for Responsive Design.
    These examples override the primary ('mobile first') styles.
    Modify as content requires.
-   ========================================================================== */
+====================================================================== */
 
 @media only screen and (min-width: 35em) {
     /* Style adjustments for viewports that meet the condition */
@@ -346,11 +355,11 @@ body.adv_search form button {
     /* Style adjustments for high resolution devices */
 }
 
-/* ==========================================================================
+/* ======================================================================
    Print styles.
    Inlined to avoid the additional HTTP request:
    https://www.phpied.com/delay-loading-your-print-css/
-   ========================================================================== */
+====================================================================== */
 
 @media print {
     *,
