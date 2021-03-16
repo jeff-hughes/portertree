@@ -16,7 +16,7 @@
     font-style: normal;
     font-weight: normal;
     font-display: swap;
-    src: url(http://localhost:8080/static/css/EB_Garamond/static/EBGaramond-Regular.ttf) format('truetype');
+    src: url(../fonts/EB_Garamond/static/EBGaramond-Regular.ttf) format('truetype');
 }
 
 @font-face {
@@ -24,7 +24,7 @@
     font-style: normal;
     font-weight: bold;
     font-display: swap;
-    src: url(http://localhost:8080/static/css/EB_Garamond/static/EBGaramond-Bold.ttf) format('truetype');
+    src: url(../fonts/EB_Garamond/static/EBGaramond-Bold.ttf) format('truetype');
 }
 
 /* ======================================================================
@@ -256,9 +256,50 @@ body.adv_search form button {
     margin: 5px;
 }
 
-/* ==========================================================================
+body.report form legend {
+    font-weight: bold;
+    margin-top: 2em;
+}
+
+body.report form label {
+    display: inline-block;
+    width: 8em;
+}
+
+body.report textarea {
+    width: 30em;
+    height: 10em;
+}
+
+.alert_message {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
+    padding: 10px 15px;
+}
+
+.alert_success {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    color: #3c763d;
+}
+
+.alert_warning {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    color: #8a6d3b;
+}
+
+.alert_error {
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    color: #a94442;
+}
+
+
+/* ======================================================================
    Helper classes
-   ========================================================================== */
+====================================================================== */
 
 /*
  * Hide visually and from screen readers
