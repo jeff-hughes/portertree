@@ -263,7 +263,7 @@ body.report form legend {
 
 body.report form label {
     display: inline-block;
-    width: 8em;
+    width: 7em;
 }
 
 body.report textarea {

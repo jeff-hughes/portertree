@@ -21,12 +21,21 @@
         <meta name="theme-color" content="#fafafa">
     </head>
     <body class="{% block body_class %}index{% endblock %}">
+        {% if self.body_class() != "index" %}
+        <header>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home page</a></li>
+                <li><a href="{{ url_for('adv_search') }}">Search</a></li>
+                <li><a href="{% if report_url %}{{ url_for('report', url=request.base_url) }}{% else %}{{ url_for('report') }}{% endif %}">Report an update/error</a></li>
+            </ul>
+        </header>
+        {% endif %}
         <div id="main_content">{% block content %}{% endblock %}</div>
         <footer>
             <ul>
                 <li><a href="{{ url_for('index') }}">Home page</a></li>
                 <li><a href="{{ url_for('adv_search') }}">Search</a></li>
-                <li><a href="{{ url_for('report') }}">Report an update/error</a></li>
+                <li><a href="{% if report_url %}{{ url_for('report', url=request.base_url) }}{% else %}{{ url_for('report') }}{% endif %}">Report an update/error</a></li>
             </ul>
         </footer>
         {% if load_treegraph %}<script src="{{ url_for('static', filename='js/treegraph.js') }}"></script>{% endif %}

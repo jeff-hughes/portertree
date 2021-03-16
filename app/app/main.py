@@ -1,15 +1,17 @@
 import json
 import os
 
-#from app import app
 from flask import Flask, render_template, request, url_for
-app = Flask(__name__)
-
+from flask_mailman import Mail, EmailMessage
 from db import DBConnect
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 GENDER_MAP = { "M": "man", "F": "woman" }
+
+app = Flask(__name__)
+app.config.from_envvar('FLASK_SETTINGS')
+mail = Mail(app)
 
 db = DBConnect()
 
@@ -149,12 +151,31 @@ def technical_details():
     return render_template("technical_details.html")
 
 
-@app.route('/report', methods=['POST'])
+@app.route('/report', methods=['GET', 'POST'])
 def report():
-    if len(request.args) > 0:
-        return render_template("report.html")
+    if request.method == "POST":
+        message = { "text": "", "style": "" }
+        if request.form["details"] != "" and request.form["name"] != "" and request.form["email"] != "":
+            msg_body = f"From: {request.form['name']} ({request.form['email']})\nURL: {request.form['url']}\n\n{request.form['details']}"
+            try:
+                msg = EmailMessage(
+                    subject="Update/error for Porter family tree",
+                    body=msg_body,
+                    to=[app.config["MAIL_TO_ADDRESS"]],
+                    reply_to=[request.form["email"]])
+                msg.send()
+                message["text"] = "Message sent. Thank you!"
+                message["style"] = "success"
+            except:
+                message["text"] = "Error sending message. Please try again later, or send the information directly to " + app.config["MAIL_TO_ADDRESS"]
+                message["style"] = "error"
+        else:
+            message["text"] = "One or more required fields was empty. Please fill out all form fields."
+            message["style"] = "error"
+        return render_template("report.html", message=message["text"], message_style=message["style"])
+
     else:
-        return render_template("report.html")
+        return render_template("report.html", url=request.args.get("url", ""))
 
 
 @app.errorhandler(404)
