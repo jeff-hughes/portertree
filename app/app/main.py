@@ -1,5 +1,8 @@
+from datetime import datetime
 import json
 import os
+import shutil
+import tempfile
 
 from flask import Flask, render_template, request, url_for
 from flask_mailman import Mail, EmailMessage
@@ -8,6 +11,7 @@ from db import DBConnect
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 GENDER_MAP = { "M": "man", "F": "woman" }
+APP_ROOT = "/app"
 
 app = Flask(__name__)
 app.config.from_envvar('FLASK_SETTINGS')
@@ -18,7 +22,18 @@ db = DBConnect()
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    raw_data_file = None
+    try:
+        files = os.listdir(os.path.join(APP_ROOT, "static/data"))
+        files = [f for f in files if f.endswith(".zip")]
+        if len(files) > 0:
+            files = sorted(files)
+            raw_data_file = "data/" + files[-1]
+        else:
+            raw_data_file = "data/" + export_data()
+    except FileNotFoundError:
+        raw_data_file = "data/" + export_data()
+    return render_template("index.html", raw_data=raw_data_file)
 
 
 @app.route('/search', methods=['GET'])
@@ -325,6 +340,18 @@ def format_date(record, day, month, year, all_blanks=False):
     elif all_blanks:
         string += ", ____"
     return string
+
+def export_data():
+    date = datetime.now().strftime("%Y%m%d")
+    tables = ["people", "marriages", "children"]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for table in tables:
+            with open(os.path.join(tmpdir, f"{table}_{date}.csv"), "w") as f:
+                db.export_data(table, f)
+
+        os.makedirs(os.path.join(APP_ROOT, "static/data"), exist_ok=True)
+        shutil.make_archive(os.path.join(APP_ROOT, "static/data", f"data_{date}"), "zip", tmpdir)
+    return f"data_{date}.zip"
 
 
 if __name__ == "__main__":

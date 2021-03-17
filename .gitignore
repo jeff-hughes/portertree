@@ -4,3 +4,4 @@ __pycache__/
 .meta/
 .env
 *.code-workspace
+app/app/static/data/*.zip

@@ -25,6 +25,7 @@
             <li><a href="{{ url_for('person_page', pid='1') }}#history-of-porters">History of the Porters (1949)</a></li>
             <li><a href="{{ url_for('maps') }}">Maps</a></li>
             <li><a href="{{ url_for('static', filename='PorterHistory1991.pdf') }}">Download PDF of original family history</a></li>
+            {% if raw_data %}<li><a href="{{ url_for('static', filename=raw_data) }}">Download raw data as CSV</a></li>{% endif %}
         </ul>
     </div>
 

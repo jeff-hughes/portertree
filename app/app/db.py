@@ -1,3 +1,4 @@
+import io
 import os
 from typing import Any, Dict, List
 import psycopg2
@@ -166,3 +167,26 @@ class DBConnect():
         for p in results:
             out.append({ k: v for k, v in zip(PERSON_COLS, p) })
         return out
+
+    def export_data(self, table: str, file_handle: io.IOBase) -> None:
+        if table == "people":
+            self.cursor.copy_expert("""
+                COPY people (id, print_id, in_tree, first_name, nickname,
+                    middle_name1, middle_name2, last_name, pref_name,
+                    gender, birth_month, birth_day, birth_year,
+                    birth_place, death_month, death_day, death_year,
+                    death_place, buried, additional_notes)
+                TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
+        elif table == "marriages":
+            self.cursor.copy_expert("""
+                COPY marriages (pid1, pid2, marriage_order,
+                    married_month, married_day, married_year,
+                    married_place, divorced, divorced_month,
+                    divorced_day, divorced_year)
+                TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
+        elif table == "children":
+            self.cursor.copy_expert("""
+                COPY children (pid, cid, birth_order)
+                TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
+        else:
+            raise ValueError
