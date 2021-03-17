@@ -15,7 +15,7 @@
     font-family: 'EB Garamond';
     font-style: normal;
     font-weight: normal;
-    font-display: swap;
+    font-display: block;
     src: url(../fonts/EB_Garamond/static/EBGaramond-Regular.ttf) format('truetype');
 }
 
@@ -23,7 +23,7 @@
     font-family: 'EB Garamond';
     font-style: normal;
     font-weight: bold;
-    font-display: swap;
+    font-display: block;
     src: url(../fonts/EB_Garamond/static/EBGaramond-Bold.ttf) format('truetype');
 }
 
