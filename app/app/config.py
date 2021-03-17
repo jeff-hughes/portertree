@@ -7,7 +7,7 @@ MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS").lower() in ['true', '1', 't']
 MAIL_USE_SSL = os.environ.get("MAIL_USE_SSL").lower() in ['true', '1', 't']
 MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
-MAIL_TO_ADDRESS = os.environ.get("MAIL_DEFAULT_SENDER")
+MAIL_TO_ADDRESS = os.environ.get("MAIL_TO_ADDRESS")
 
 _mail_opts = {
     "MAIL_SERVER": MAIL_SERVER,

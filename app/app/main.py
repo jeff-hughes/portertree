@@ -156,13 +156,15 @@ def report():
     if request.method == "POST":
         message = { "text": "", "style": "" }
         if request.form["details"] != "" and request.form["name"] != "" and request.form["email"] != "":
-            msg_body = f"From: {request.form['name']} ({request.form['email']})\nURL: {request.form['url']}\n\n{request.form['details']}"
+            name = request.form["name"].strip().replace("\r", "").replace("\n", "")
+            email = request.form["email"].strip().replace("\r", "").replace("\n", "")
+            msg_body = f"From: {name} ({email})\nURL: {request.form['url']}\n\n{request.form['details']}"
             try:
                 msg = EmailMessage(
-                    subject="Update/error for Porter family tree",
+                    subject="Update for Porter family tree",
                     body=msg_body,
                     to=[app.config["MAIL_TO_ADDRESS"]],
-                    reply_to=[request.form["email"]])
+                    reply_to=[email])
                 msg.send()
                 message["text"] = "Message sent. Thank you!"
                 message["style"] = "success"
