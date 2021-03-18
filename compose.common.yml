@@ -13,12 +13,7 @@ services:
   app:
     build:
       context: ./app
-      target: dev
     restart: always
-    ports:
-      - 8080:80
-    volumes:
-      - ./app/app:/app
     env_file: .env
     environment:
       POSTGRES_HOST: db
@@ -31,7 +26,6 @@ services:
 
 volumes:
   pgdata:
-  csvdata:
 
 networks:
   porter:
