@@ -3,10 +3,6 @@ set -e
 
 /uwsgi-nginx-entrypoint.sh
 
-# Explicitly add installed Python packages and uWSGI Python packages to PYTHONPATH
-# Otherwise uWSGI can't import Flask
-export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/site-packages:/usr/lib/python3.6/site-packages
-
 # Get the URL for static files from the environment variable
 USE_STATIC_URL=${STATIC_URL:-'/static'}
 # Get the absolute path of the static files from the environment variable
@@ -38,6 +34,13 @@ else
     content_server=$content_server'}\n'
     # Save generated server /etc/nginx/conf.d/nginx.conf
     printf "$content_server" > /etc/nginx/conf.d/nginx.conf
+fi
+
+# For Alpine:
+# Explicitly add installed Python packages and uWSGI Python packages to PYTHONPATH
+# Otherwise uWSGI can't import Flask
+if [ -n "$ALPINEPYTHON" ] ; then
+    export PYTHONPATH=$PYTHONPATH:/usr/local/lib/$ALPINEPYTHON/site-packages:/usr/lib/$ALPINEPYTHON/site-packages
 fi
 
 exec "$@"
