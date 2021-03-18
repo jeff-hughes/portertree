@@ -1,12 +1,11 @@
-FROM tiangolo/uwsgi-nginx:python3.7 as base
+FROM tiangolo/uwsgi-nginx:python3.8-alpine as base
 
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
-RUN apt-get update \
-    && apt-get -y install python3-dev
-
-COPY ./requirements.txt /requirements.txt
-RUN pip install -r /requirements.txt
+RUN apk add --no-cache --virtual .build-deps gcc libc-dev python3-dev \
+    && apk add --no-cache postgresql-dev \
+    && pip install Flask==1.1.2 Flask-Mailman==0.1.7 psycopg2==2.8.6 \
+    && apk del .build-deps
 
 # URL under which static (not modified by Python) files will be requested
 # They will be served by Nginx directly, without being handled by uWSGI
