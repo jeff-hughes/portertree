@@ -1,0 +1,3 @@
+Flask==1.1.1
+Flask-Mailman==0.1.7
+psycopg2==2.8.6
