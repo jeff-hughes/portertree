@@ -12,6 +12,10 @@ MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 GENDER_MAP = { "M": "man", "F": "woman" }
 APP_ROOT = "/app"
+CURR_YEAR = datetime.today().year
+
+# special cases with extended notes about the early family members
+EXTENDED_NOTES = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
 
 app = Flask(__name__)
 app.config.from_envvar('FLASK_SETTINGS')
@@ -134,8 +138,7 @@ def person_page(pid):
     data["treegraph"] = json.dumps([treegraph])
 
     # special cases with extended notes about the early family members
-    extended = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
-    if data["focal"]["id"] in extended:
+    if data["focal"]["id"] in EXTENDED_NOTES:
         return render_template(f"extended/person{data['focal']['id']}.html", data=data)
     else:
         return render_template("person.html", data=data)
@@ -250,7 +253,11 @@ def format_person_data(record, emphasis=False):
     output["life_span"] = create_life_span(record)
 
     output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
-    output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
+    if is_attr(output, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (CURR_YEAR-100):
+        output["death_date"] = format_date(record, "death_day", "death_month", "death_year")
+        # assume the best if someone is less than 100 years old :)
+    else:
+        output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
 
     # used in graphical tree
     output["name"] = create_short_name(record)
@@ -311,7 +318,7 @@ def create_life_span(record):
 
     if is_attr(record, "death_year"):
         string += f" - {record['death_year']})"
-    elif is_attr(record, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (2019-100):
+    elif is_attr(record, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (CURR_YEAR-100):
         string += " - present)"
         # assume the best if someone is less than 100 years old :)
     else:
@@ -332,6 +339,7 @@ def format_date(record, day, month, year, all_blanks=False):
             string += record[month]
     elif all_blanks:
         string += "_____ __"
+
     if is_attr(record, year):
         if string != "":
             string += ", " + record[year]
@@ -339,6 +347,9 @@ def format_date(record, day, month, year, all_blanks=False):
             string += record[year]
     elif all_blanks:
         string += ", ____"
+
+    if string == "":
+        string = None
     return string
 
 def export_data():

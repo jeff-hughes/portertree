@@ -11,7 +11,7 @@
     <dl>
         <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focal.birth_date }}{% if data.focal.birth_place %}; {{ data.focal.birth_place }}{% endif %}</dd></div>
 
-        {% if data.focal.death_date is not undefined or data.focal.death_place is not undefined %}
+        {% if data.focal.death_date or data.focal.death_place %}
             <div class="dl_row"><dt>Death:</dt><dd>{{ data.focal.death_date }}{% if data.focal.death_place %}; {{ data.focal.death_place }}{% endif %}</dd></div>
         {% endif %}
 
