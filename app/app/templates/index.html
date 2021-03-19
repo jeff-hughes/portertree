@@ -7,7 +7,7 @@
 {% block content %}
     <div class="focus_text">
         <h2>The Family History of William Porter and Elizabeth Kenney</h2>
-        <p class="start_links"><a href="{{ url_for('person_page', pid='1') }}">William Porter</a> &ndash; <a href="{{ url_for('person_page', pid='1a') }}">Elizabeth Kenney</a></p>
+        <p class="start_links"><span><a href="{{ url_for('person_page', pid='1') }}">William Porter</a></span><span>&ndash;</span><span><a href="{{ url_for('person_page', pid='1a') }}">Elizabeth Kenney</a></span></p>
 
         <form method="GET" action="{{ url_for('search') }}">
             <p><input type="text" name="search" id="search" placeholder="Search for name..." aria-placeholder="Search for name" /></p>
