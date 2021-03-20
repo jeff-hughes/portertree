@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
 set -e
 
-#/uwsgi-nginx-entrypoint.sh
+sed "s/{{DOMAIN}}/$DOMAIN/g" /nginx.tmpl > /etc/nginx/conf.d/nginx.conf
 
 # For Alpine:
 # Explicitly add installed Python packages and uWSGI Python packages to PYTHONPATH

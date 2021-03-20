@@ -6,3 +6,5 @@ services:
       target: prod
     ports:
       - 80:80
+    environment:
+      DOMAIN: porterfamilytree.ca

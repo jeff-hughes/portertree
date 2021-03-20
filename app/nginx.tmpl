@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name porterfamilytree.ca;
+    server_name {{DOMAIN}};
 
     # tries to find a file at the location specified, or
     # falls back to the @app location
@@ -21,6 +21,6 @@ server {
 # redirect www to non-www
 server {
     listen 80;
-    server_name www.porterfamilytree.ca;
-    return 301 $scheme://porterfamilytree.ca$request_uri;
+    server_name www.{{DOMAIN}};
+    return 301 $scheme://{{DOMAIN}}$request_uri;
 }

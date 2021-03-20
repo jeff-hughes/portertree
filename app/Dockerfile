@@ -19,10 +19,7 @@ CMD ["python", "main.py"]
 # Production image
 FROM base as prod
 
-COPY nginx.conf /etc/nginx/conf.d/nginx.conf
-
-# Move the base entrypoint to reuse it
-RUN mv /entrypoint.sh /uwsgi-nginx-entrypoint.sh
+COPY nginx.tmpl /nginx.tmpl
 
 # Copy the entrypoint that will generate Nginx additional configs
 COPY entrypoint.sh /entrypoint.sh
@@ -30,7 +27,6 @@ RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-# Add demo app
 COPY ./app /app
 WORKDIR /app
 
