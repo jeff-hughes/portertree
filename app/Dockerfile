@@ -3,7 +3,7 @@ FROM tiangolo/uwsgi-nginx:python3.8-alpine as base
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
 RUN apk add --no-cache --virtual .build-deps gcc libc-dev python3-dev \
-    && apk add --no-cache postgresql-dev \
+    && apk add --no-cache openssl postgresql-dev \
     && pip install Flask==1.1.2 Flask-Mailman==0.1.7 psycopg2==2.8.6 \
     && apk del .build-deps
 

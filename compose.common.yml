@@ -6,7 +6,7 @@ services:
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
-    env_file: .env
+    env_file: app.env
     networks:
       - porter
 
@@ -14,7 +14,7 @@ services:
     build:
       context: ./app
     restart: always
-    env_file: .env
+    env_file: app.env
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432

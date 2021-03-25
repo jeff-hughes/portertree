@@ -2,6 +2,6 @@ venv/
 __pycache__/
 *.pyc
 .meta/
-.env
+*.env
 *.code-workspace
 app/app/static/data/*.zip
