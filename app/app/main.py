@@ -3,9 +3,13 @@ import json
 import os
 import shutil
 import tempfile
+from urllib.parse import urlparse, urljoin
 
-from flask import Flask, render_template, request, url_for
+from flask import abort, Flask, flash, redirect, render_template, request, url_for
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_mailman import Mail, EmailMessage
+
+from auth import User, hash_pass
 from db import DBConnect
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -20,6 +24,7 @@ EXTENDED_NOTES = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
 app = Flask(__name__)
 app.config.from_envvar('FLASK_SETTINGS')
 mail = Mail(app)
+login_manager = LoginManager(app)
 
 db = DBConnect()
 
@@ -204,6 +209,36 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
+@app.route('/admin/login', methods=['GET', 'POST'])
+def login():
+    if request.method == "POST":
+        user_entry = User.get(request.form["username"])
+        if (user_entry is not None):
+            pass_hash = hash_pass(request.form["password"])
+            user = User(user_entry[0], user_entry[1])
+            if (user.password == pass_hash):
+                login_user(user)
+
+                flash("Logged in successfully.")
+                nexturl = request.args.get("next")
+                if not is_safe_url(nexturl):
+                    return abort(400)
+
+        return redirect(nexturl or url_for("index"))
+    return render_template("admin_login.html")
+
+@app.route("/admin/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
+@app.route('/admin/test')
+@login_required
+def test():
+    return render_template("admin_test.html")
+
+
 # Helper functions
 
 def is_attr(record, attr):
@@ -363,6 +398,16 @@ def export_data():
         os.makedirs(os.path.join(APP_ROOT, "static/data"), exist_ok=True)
         shutil.make_archive(os.path.join(APP_ROOT, "static/data", f"data_{date}"), "zip", tmpdir)
     return f"data_{date}.zip"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+        ref_url.netloc == test_url.netloc
 
 
 if __name__ == "__main__":

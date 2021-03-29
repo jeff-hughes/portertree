@@ -1,5 +1,10 @@
 import os
 
+SECRET_KEY = os.environb.get(b"FLASK_SECRET_KEY").decode("unicode-escape").encode("latin-1")
+
+if SECRET_KEY is None:
+    raise ValueError(f"SECRET_KEY is not set for Flask")
+
 MAIL_SERVER = os.environ.get("MAIL_SERVER")
 MAIL_PORT = int(os.environ.get("MAIL_PORT"))
 MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
