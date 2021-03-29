@@ -209,13 +209,14 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
+# ADMIN ROUTES -------------------------------------------------------
+
 @app.route('/admin/login', methods=['GET', 'POST'])
-def login():
+def admin_login():
     if request.method == "POST":
-        user_entry = User.get(request.form["username"])
-        if (user_entry is not None):
+        user = User.get(request.form["username"])
+        if (user is not None):
             pass_hash = hash_pass(request.form["password"])
-            user = User(user_entry[0], user_entry[1])
             if (user.password == pass_hash):
                 login_user(user)
 
@@ -224,22 +225,39 @@ def login():
                 if not is_safe_url(nexturl):
                     return abort(400)
 
-        return redirect(nexturl or url_for("index"))
+        return redirect(nexturl or url_for("admin_index"))
     return render_template("admin_login.html")
 
-@app.route("/admin/logout")
+
+@app.route('/admin/logout')
 @login_required
-def logout():
+def admin_logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/admin/test')
+
+@app.route('/admin', methods=['GET'])
 @login_required
-def test():
-    return render_template("admin_test.html")
+def admin_index():
+    if len(request.args) > 0 and int(request.args.get("export")) == 1:
+        # re-export data from database to CSV file
+        data_fn = export_data()
+        data_path = url_for("static", filename="data/"+data_fn)
+        if data_path.startswith("/"):
+            data_path = data_path[1:]
+        data_path = request.url_root + data_path
+        return render_template("admin_index.html", exported_data=data_path)
+    else:
+        return render_template("admin_index.html")
 
 
-# Helper functions
+@app.route('/admin/editdata')
+@login_required
+def admin_editdata():
+    pass
+
+
+# Helper functions ---------------------------------------------------
 
 def is_attr(record, attr):
     if attr in record and record[attr] is not None:

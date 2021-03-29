@@ -255,6 +255,11 @@ body.report textarea {
     height: 10em;
 }
 
+body.admin_login form label {
+    display: inline-block;
+    width: 5em;
+}
+
 .alert_message {
     border-width: 1px;
     border-style: solid;
@@ -449,16 +454,6 @@ body.report textarea {
         grid-row: auto;
         margin: 5px;
         width: auto;
-    }
-
-    body.report form legend {
-        font-weight: bold;
-        margin-top: 2em;
-    }
-
-    body.report form label {
-        display: inline-block;
-        width: 7em;
     }
 }
 

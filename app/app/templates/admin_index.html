@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Admin{% endblock %}
+
+{% block body_class %}admin_index{% endblock %}
+
+{% block content %}
+    <h2>Admin</h2>
+    {% if exported_data %}<div class="alert_message alert_success">Data has been exported at <a href="{{ exported_data }}">{{ exported_data }}</a></div>{% endif %}
+    <ul>
+        <li><a href="{{ url_for('admin_editdata') }}">Add/edit data</a></li>
+        <li><a href="{{ url_for('admin_index', export=1) }}">Re-export data to CSV</a></li>
+        <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
+    </ul>
+{% endblock %}
