@@ -236,6 +236,10 @@ body.adv_search form textarea {
     width: 90%;
 }
 
+body.adv_search form input[type="checkbox"] {
+    width: auto;
+}
+
 body.adv_search form button {
     margin: 5px 0;
 }
@@ -258,6 +262,51 @@ body.report textarea {
 body.admin_login form label {
     display: inline-block;
     width: 5em;
+}
+
+body.admin_editdata #form_data {
+    margin-top: 2em;
+}
+
+body.admin_editdata form legend {
+    font-weight: bold;
+    margin-top: 2em;
+}
+
+body.admin_editdata form fieldset:first-of-type legend,
+body.admin_editdata form h3 + fieldset legend:first-child {
+    margin-top: 0;
+}
+
+body.admin_editdata form fieldset p {
+    margin: 0.25em 0;
+}
+
+body.admin_editdata form label {
+    display: inline-block;
+    width: 7em;
+}
+
+body.admin_editdata form input,
+body.admin_editdata form select {
+    width: 20%;
+}
+body.admin_editdata form textarea {
+    display: block;
+    width: 82%;
+    height: 5em;
+}
+
+body.admin_editdata form .long_input {
+    width: 63.3%;
+}
+
+body.admin_editdata form input[type="checkbox"] {
+    width: auto;
+}
+
+body.admin_editdata form button {
+    margin: 5px 0;
 }
 
 .alert_message {

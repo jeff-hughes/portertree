@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}Add/Edit Data{% endblock %}
+
+{% block body_class %}admin_editdata{% endblock %}
+
+{% block content %}
+    <h2>Add/Edit Data</h2>
+    <form id="form_search" method="GET" action="{{ url_for('admin_editdata') }}">
+        <p>
+            <label for="search_id">Person ID:</label>
+            <input type="text" id ="search_id" name="search_id" value="{{ focal.id if focal.id }}" />
+            <button type="submit">Search</button>
+        </p>
+    </form>
+
+    <form id="form_data" method="POST" action="{{ url_for('admin_editdata') }}">
+        <input type="hidden" id="update" name="update" value="{% if update %}True{% else %}False{% endif %}" />
+        <fieldset>
+            <legend>Identifiers</legend>
+            <p>
+                <label for="id">ID:</label>
+                <input type="text" id="id" name="id" value="{{ focal.id if focal.id }}" required />
+            </p>
+
+            <p>
+                <label for="print_id">Print ID:</label>
+                <input type="text" id="print_id" name="print_id" value="{{ focal.print_id if focal.print_id }}" />
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Name</legend>
+            <p>
+                <label for="first_name">First name:</label>
+                <input type="text" id="first_name" name="first_name" value="{{ focal.first_name if focal.first_name }}" />
+            </p>
+
+            <p>
+                <label for="nickname">Nickname:</label>
+                <input type="text" id="nickname" name="nickname" value="{{ focal.nickname if focal.nickname }}" />
+            </p>
+
+            <p>
+                <label for="middle_name1">Middle name 1:</label>
+                <input type="text" id="middle_name1" name="middle_name1" value="{{ focal.middle_name1 if focal.middle_name1 }}" />
+            </p>
+
+            <p>
+                <label for="middle_name2">Middle name 2:</label>
+                <input type="text" id="middle_name2" name="middle_name2" value="{{ focal.middle_name2 if focal.middle_name2 }}" />
+            </p>
+
+            <p>
+                <label for="last_name">Last name:</label>
+                <input type="text" id="last_name" name="last_name" value="{{ focal.last_name if focal.last_name }}" />
+            </p>
+
+            <p>
+                <label for="pref_name">Preferred name:</label>
+                <select id="pref_name" name="pref_name">
+                    <option value="">--</option>
+                    <option value="F"{% if focal.pref_name == 'F ' %} selected{% endif %}>First name</option>
+                    <option value="N"{% if focal.pref_name == 'N ' %} selected{% endif %}>Nickname</option>
+                    <option value="M1"{% if focal.pref_name == 'M1' %} selected{% endif %}>Middle name 1</option>
+                    <option value="M2"{% if focal.pref_name == 'M2' %} selected{% endif %}>Middle name 2</option>
+                </select>
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Birth</legend>
+            <p>
+                <label for="birth_month">Birth date:</label>
+                <select id="birth_month" name="birth_month">
+                    <option value="">--</option>
+                    <option value="January"{% if focal.birth_month == 'January' %} selected{% endif %}>January</option>
+                    <option value="February"{% if focal.birth_month == 'February' %} selected{% endif %}>February</option>
+                    <option value="March"{% if focal.birth_month == 'March' %} selected{% endif %}>March</option>
+                    <option value="April"{% if focal.birth_month == 'April' %} selected{% endif %}>April</option>
+                    <option value="May"{% if focal.birth_month == 'May' %} selected{% endif %}>May</option>
+                    <option value="June"{% if focal.birth_month == 'June' %} selected{% endif %}>June</option>
+                    <option value="July"{% if focal.birth_month == 'July' %} selected{% endif %}>July</option>
+                    <option value="August"{% if focal.birth_month == 'August' %} selected{% endif %}>August</option>
+                    <option value="September"{% if focal.birth_month == 'September' %} selected{% endif %}>September</option>
+                    <option value="October"{% if focal.birth_month == 'October' %} selected{% endif %}>October</option>
+                    <option value="November"{% if focal.birth_month == 'November' %} selected{% endif %}>November</option>
+                    <option value="December"{% if focal.birth_month == 'December' %} selected{% endif %}>December</option>
+                </select>
+                <input type="text" id="birth_day" name="birth_day" placeholder="Day" value="{{ focal.birth_day if focal.birth_day }}" />
+                <input type="text" id="birth_year" name="birth_year" placeholder="Year" value="{{ focal.birth_year if focal.birth_year }}" />
+            </p>
+
+            <p>
+                <label for="birth_place">Birth place:</label>
+                <input type="text" class="long_input" id="birth_place" name="birth_place" value="{{ focal.birth_place if focal.birth_place }}" />
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Death</legend>
+            <p>
+                <label for="death_month">Death date:</label>
+                <select id="death_month" name="death_month">
+                    <option value="">--</option>
+                    <option value="January"{% if focal.death_month == 'January' %} selected{% endif %}>January</option>
+                    <option value="February"{% if focal.death_month == 'February' %} selected{% endif %}>February</option>
+                    <option value="March"{% if focal.death_month == 'March' %} selected{% endif %}>March</option>
+                    <option value="April"{% if focal.death_month == 'April' %} selected{% endif %}>April</option>
+                    <option value="May"{% if focal.death_month == 'May' %} selected{% endif %}>May</option>
+                    <option value="June"{% if focal.death_month == 'June' %} selected{% endif %}>June</option>
+                    <option value="July"{% if focal.death_month == 'July' %} selected{% endif %}>July</option>
+                    <option value="August"{% if focal.death_month == 'August' %} selected{% endif %}>August</option>
+                    <option value="September"{% if focal.death_month == 'September' %} selected{% endif %}>September</option>
+                    <option value="October"{% if focal.death_month == 'October' %} selected{% endif %}>October</option>
+                    <option value="November"{% if focal.death_month == 'November' %} selected{% endif %}>November</option>
+                    <option value="December"{% if focal.death_month == 'December' %} selected{% endif %}>December</option>
+                </select>
+                <input type="text" id="death_day" name="death_day" placeholder="Day" value="{{ focal.death_day if focal.death_day }}" />
+                <input type="text" id="death_year" name="death_year" placeholder="Year" value="{{ focal.death_year if focal.death_year }}" />
+            </p>
+
+            <p>
+                <label for="death_place">Death place:</label>
+                <input type="text" class="long_input" id="death_place" name="death_place" value="{{ focal.death_place if focal.death_place }}" />
+            </p>
+
+            <p>
+                <label for="buried">Burial place:</label>
+                <input type="text" class="long_input" id="buried" name="buried" value="{{ focal.buried if focal.buried }}" />
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Miscellaneous</legend>
+            <p>
+                <label for="in_tree">In tree:</label>
+                <input type="checkbox" id="in_tree" name="in_tree"{% if focal.in_tree %} checked{% endif %} />
+            </p>
+
+            <p>
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender">
+                    <option value="">--</option>
+                    <option value="F"{% if focal.gender == 'F' %} selected{% endif %}>Female</option>
+                    <option value="M"{% if focal.gender == 'M' %} selected{% endif %}>Male</option>
+                    <option value="N"{% if focal.gender == 'N' %} selected{% endif %}>Non-binary</option>
+                </select>
+            </p>
+
+            <p>
+                <label for="additional_notes">Additional notes:</label>
+                <textarea id="additional_notes" name="additional_notes">{{ focal.additional_notes if focal.additional_notes }}</textarea>
+            </p>
+        </fieldset>
+
+        <fieldset>
+            <legend>Parents</legend>
+            <div id="parents_container">
+                {% for p in parents %}
+                    <p>
+                        <label for="parent_id_p{{ loop.index }}">Parent {{ loop.index }} ID:</label>
+                        <input type="text" id="parent_id_p{{ loop.index }}" name="parent_id_p{{ loop.index }}" value="{{ p.id if p.id }}" />
+                    </p>
+                {% endfor %}
+            </div>
+            <button id="add_parent" type="button">Add Parent</button>
+        </fieldset>
+
+        <div id="marriages_container">
+            {% for m in marriages %}
+            <h3>Marriage {{ loop.index }}</h3>
+            <fieldset>
+                <legend>Marriage</legend>
+                <p>
+                    <label for="marriage_order_m{{ loop.index }}">Marriage order:</label>
+                    <input type="number" id="marriage_order_m{{ loop.index }}" name="marriage_order_m{{ loop.index }}" value="{{ m.marriage.marriage_order if m.marriage.marriage_order }}" />
+                </p>
+
+                <p>
+                    <label for="married_month_m{{ loop.index }}">Marriage date:</label>
+                    <select id="married_month_m{{ loop.index }}" name="married_month_m{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="January"{% if m.marriage.married_month == 'January' %} selected{% endif %}>January</option>
+                        <option value="February"{% if m.marriage.married_month == 'February' %} selected{% endif %}>February</option>
+                        <option value="March"{% if m.marriage.married_month == 'March' %} selected{% endif %}>March</option>
+                        <option value="April"{% if m.marriage.married_month == 'April' %} selected{% endif %}>April</option>
+                        <option value="May"{% if m.marriage.married_month == 'May' %} selected{% endif %}>May</option>
+                        <option value="June"{% if m.marriage.married_month == 'June' %} selected{% endif %}>June</option>
+                        <option value="July"{% if m.marriage.married_month == 'July' %} selected{% endif %}>July</option>
+                        <option value="August"{% if m.marriage.married_month == 'August' %} selected{% endif %}>August</option>
+                        <option value="September"{% if m.marriage.married_month == 'September' %} selected{% endif %}>September</option>
+                        <option value="October"{% if m.marriage.married_month == 'October' %} selected{% endif %}>October</option>
+                        <option value="November"{% if m.marriage.married_month == 'November' %} selected{% endif %}>November</option>
+                        <option value="December"{% if m.marriage.married_month == 'December' %} selected{% endif %}>December</option>
+                    </select>
+                    <input type="text" id="married_day_m{{ loop.index }}" name="married_day_m{{ loop.index }}" placeholder="Day" value="{{ m.marriage.marriage_day if m.marriage.marriage_day }}" />
+                    <input type="text" id="married_year_m{{ loop.index }}" name="married_year_m{{ loop.index }}" placeholder="Year" value="{{ m.marriage.married_year if m.marriage.married_year }}" />
+                </p>
+
+                <p>
+                    <label for="married_place_m{{ loop.index }}">Marriage place:</label>
+                    <input type="text" class="long_input" id="married_place_m{{ loop.index }}" name="married_place_m{{ loop.index }}" value="{{ m.marriage.married_place if m.marriage.married_place }}" />
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Divorce</legend>
+                <p>
+                    <label for="divorced_m{{ loop.index }}">Divorced:</label>
+                    <input type="checkbox" id="divorced_m{{ loop.index }}" name="divorced_m{{ loop.index }}"{% if m.marriage.divorced %} checked{% endif %} />
+                </p>
+
+                <p>
+                    <label for="divorced_month_m{{ loop.index }}">Divorce date:</label>
+                    <select id="divorced_month_m{{ loop.index }}" name="divorced_month_m{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="January"{% if m.marriage.divorced_month == 'January' %} selected{% endif %}>January</option>
+                        <option value="February"{% if m.marriage.divorced_month == 'February' %} selected{% endif %}>February</option>
+                        <option value="March"{% if m.marriage.divorced_month == 'March' %} selected{% endif %}>March</option>
+                        <option value="April"{% if m.marriage.divorced_month == 'April' %} selected{% endif %}>April</option>
+                        <option value="May"{% if m.marriage.divorced_month == 'May' %} selected{% endif %}>May</option>
+                        <option value="June"{% if m.marriage.divorced_month == 'June' %} selected{% endif %}>June</option>
+                        <option value="July"{% if m.marriage.divorced_month == 'July' %} selected{% endif %}>July</option>
+                        <option value="August"{% if m.marriage.divorced_month == 'August' %} selected{% endif %}>August</option>
+                        <option value="September"{% if m.marriage.divorced_month == 'September' %} selected{% endif %}>September</option>
+                        <option value="October"{% if m.marriage.divorced_month == 'October' %} selected{% endif %}>October</option>
+                        <option value="November"{% if m.marriage.divorced_month == 'November' %} selected{% endif %}>November</option>
+                        <option value="December"{% if m.marriage.divorced_month == 'December' %} selected{% endif %}>December</option>
+                    </select>
+                    <input type="text" id="divorced_day_m{{ loop.index }}" name="divorced_day_m{{ loop.index }}" placeholder="Day" value="{{ m.marriage.divorced_day if m.marriage.divorced_day }}" />
+                    <input type="text" id="divorced_year_m{{ loop.index }}" name="divorced_year_m{{ loop.index }}" placeholder="Year" value="{{ m.marriage.divorced_year if m.marriage.divorced_year }}" />
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <p>
+                    <legend>Spouse {{ loop.index }} Identifiers</legend>
+                    <label for="id_s{{ loop.index }}">ID:</label>
+                    <input type="text" id="id_s{{ loop.index }}" name="id_s{{ loop.index }}" value="{{ m.spouse.id if m.spouse.id }}" required />
+                </p>
+
+                <p>
+                    <label for="print_id_s{{ loop.index }}">Print ID:</label>
+                    <input type="text" id="print_id_s{{ loop.index }}" name="print_id_s{{ loop.index }}" value="{{ m.spouse.print_id if m.spouse.print_id }}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <p>
+                    <legend>Spouse {{ loop.index }} Name</legend>
+                    <label for="first_name_s{{ loop.index }}">First name:</label>
+                    <input type="text" id="first_name_s{{ loop.index }}" name="first_name_s{{ loop.index }}" value="{{ m.spouse.first_name if m.spouse.first_name }}" />
+                </p>
+
+                <p>
+                    <label for="nickname_s{{ loop.index }}">Nickname:</label>
+                    <input type="text" id="nickname_s{{ loop.index }}" name="nickname_s{{ loop.index }}" value="{{ m.spouse.nickname if m.spouse.nickname }}" />
+                </p>
+
+                <p>
+                    <label for="middle_name1_s{{ loop.index }}">Middle name 1:</label>
+                    <input type="text" id="middle_name1_s{{ loop.index }}" name="middle_name1_s{{ loop.index }}" value="{{ m.spouse.middle_name1 if m.spouse.middle_name1 }}" />
+                </p>
+
+                <p>
+                    <label for="middle_name2_s{{ loop.index }}">Middle name 2:</label>
+                    <input type="text" id="middle_name2_s{{ loop.index }}" name="middle_name2_s{{ loop.index }}" value="{{ m.spouse.middle_name2 if m.spouse.middle_name2 }}" />
+                </p>
+
+                <p>
+                    <label for="last_name_s{{ loop.index }}">Last name:</label>
+                    <input type="text" id="last_name_s{{ loop.index }}" name="last_name_s{{ loop.index }}" value="{{ m.spouse.last_name if m.spouse.last_name }}" />
+                </p>
+
+                <p>
+                    <label for="pref_name_s{{ loop.index }}">Preferred name:</label>
+                    <select id="pref_name_s{{ loop.index }}" name="pref_name_s{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="F"{% if m.spouse.pref_name == 'F ' %} selected{% endif %}>First name</option>
+                        <option value="N"{% if m.spouse.pref_name == 'N ' %} selected{% endif %}>Nickname</option>
+                        <option value="M1"{% if m.spouse.pref_name == 'M1' %} selected{% endif %}>Middle name 1</option>
+                        <option value="M2"{% if m.spouse.pref_name == 'M2' %} selected{% endif %}>Middle name 2</option>
+                    </select>
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse {{ loop.index }} Birth</legend>
+                <p>
+                    <label for="birth_month_s{{ loop.index }}">Birth date:</label>
+                    <select id="birth_month_s{{ loop.index }}" name="birth_month_s{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="January"{% if m.spouse.birth_month == 'January' %} selected{% endif %}>January</option>
+                        <option value="February"{% if m.spouse.birth_month == 'February' %} selected{% endif %}>February</option>
+                        <option value="March"{% if m.spouse.birth_month == 'March' %} selected{% endif %}>March</option>
+                        <option value="April"{% if m.spouse.birth_month == 'April' %} selected{% endif %}>April</option>
+                        <option value="May"{% if m.spouse.birth_month == 'May' %} selected{% endif %}>May</option>
+                        <option value="June"{% if m.spouse.birth_month == 'June' %} selected{% endif %}>June</option>
+                        <option value="July"{% if m.spouse.birth_month == 'July' %} selected{% endif %}>July</option>
+                        <option value="August"{% if m.spouse.birth_month == 'August' %} selected{% endif %}>August</option>
+                        <option value="September"{% if m.spouse.birth_month == 'September' %} selected{% endif %}>September</option>
+                        <option value="October"{% if m.spouse.birth_month == 'October' %} selected{% endif %}>October</option>
+                        <option value="November"{% if m.spouse.birth_month == 'November' %} selected{% endif %}>November</option>
+                        <option value="December"{% if m.spouse.birth_month == 'December' %} selected{% endif %}>December</option>
+                    </select>
+                    <input type="text" id="birth_day_s{{ loop.index }}" name="birth_day_s{{ loop.index }}" placeholder="Day" value="{{ m.spouse.birth_day if m.spouse.birth_day }}" />
+                    <input type="text" id="birth_year_s{{ loop.index }}" name="birth_year_s{{ loop.index }}" placeholder="Year" value="{{ m.spouse.birth_year if m.spouse.birth_year }}" />
+                </p>
+
+                <p>
+                    <label for="birth_place_s{{ loop.index }}">Birth place:</label>
+                    <input type="text" class="long_input" id="birth_place_s{{ loop.index }}" name="birth_place_s{{ loop.index }}" value="{{ m.spouse.birth_place if m.spouse.birth_place }}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse {{ loop.index }} Death</legend>
+                <p>
+                    <label for="death_month_s{{ loop.index }}">Death date:</label>
+                    <select id="death_month_s{{ loop.index }}" name="death_month_s{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="January"{% if m.spouse.death_month == 'January' %} selected{% endif %}>January</option>
+                        <option value="February"{% if m.spouse.death_month == 'February' %} selected{% endif %}>February</option>
+                        <option value="March"{% if m.spouse.death_month == 'March' %} selected{% endif %}>March</option>
+                        <option value="April"{% if m.spouse.death_month == 'April' %} selected{% endif %}>April</option>
+                        <option value="May"{% if m.spouse.death_month == 'May' %} selected{% endif %}>May</option>
+                        <option value="June"{% if m.spouse.death_month == 'June' %} selected{% endif %}>June</option>
+                        <option value="July"{% if m.spouse.death_month == 'July' %} selected{% endif %}>July</option>
+                        <option value="August"{% if m.spouse.death_month == 'August' %} selected{% endif %}>August</option>
+                        <option value="September"{% if m.spouse.death_month == 'September' %} selected{% endif %}>September</option>
+                        <option value="October"{% if m.spouse.death_month == 'October' %} selected{% endif %}>October</option>
+                        <option value="November"{% if m.spouse.death_month == 'November' %} selected{% endif %}>November</option>
+                        <option value="December"{% if m.spouse.death_month == 'December' %} selected{% endif %}>December</option>
+                    </select>
+                    <input type="text" id="death_day_s{{ loop.index }}" name="death_day_s{{ loop.index }}" placeholder="Day" value="{{ m.spouse.death_day if m.spouse.death_day }}" />
+                    <input type="text" id="death_year_s{{ loop.index }}" name="death_year_s{{ loop.index }}" placeholder="Year" value="{{ m.spouse.death_year if m.spouse.death_year }}" />
+                </p>
+
+                <p>
+                    <label for="death_place_s{{ loop.index }}">Death place:</label>
+                    <input type="text" class="long_input" id="death_place_s{{ loop.index }}" name="death_place_s{{ loop.index }}" value="{{ m.spouse.death_place if m.spouse.death_place }}" />
+                </p>
+
+                <p>
+                    <label for="buried_s{{ loop.index }}">Burial place:</label>
+                    <input type="text" class="long_input" id="buried_s{{ loop.index }}" name="buried_s{{ loop.index }}" value="{{ m.spouse.buried if m.spouse.buried }}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse {{ loop.index }} Miscellaneous</legend>
+                <p>
+                    <label for="in_tree_s{{ loop.index }}">In tree:</label>
+                    <input type="checkbox" id="in_tree_s{{ loop.index }}" name="in_tree_s{{ loop.index }}"{% if m.spouse.in_tree %} checked{% endif %} />
+                </p>
+
+                <p>
+                    <label for="gender_s{{ loop.index }}">Gender:</label>
+                    <select id="gender_s{{ loop.index }}" name="gender_s{{ loop.index }}">
+                        <option value="">--</option>
+                        <option value="F"{% if m.spouse.gender == 'F' %} selected{% endif %}>Female</option>
+                        <option value="M"{% if m.spouse.gender == 'M' %} selected{% endif %}>Male</option>
+                        <option value="N"{% if m.spouse.gender == 'N' %} selected{% endif %}>Non-binary</option>
+                    </select>
+                </p>
+
+                <p>
+                    <label for="additional_notes_s{{ loop.index }}">Additional notes:</label>
+                    <textarea id="additional_notes_s{{ loop.index }}" name="additional_notes_s{{ loop.index }}">{{ m.spouse.additional_notes if m.spouse.additional_notes }}</textarea>
+                </p>
+            </fieldset>
+            {% endfor %}
+        </div>
+        <button id="add_marriage" type="button">Add Marriage</button>
+
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+<script>
+    var num_parents = {{ parents | length }};
+    var num_marriages = {{ marriages | length }};
+    document.getElementById("add_parent").onclick = function(e) {
+        num_parents++;
+        var node = document.getElementById("parents_container");
+        node.insertAdjacentHTML("beforeend", `<p>
+            <label for="parent_id_p${num_parents}">Parent ${num_parents} ID:</label>
+            <input type="text" id="parent_id_p${num_parents}" name="parent_id_p${num_parents}" />
+        </p>`);
+    };
+
+    document.getElementById("add_marriage").onclick = function(e) {
+        num_marriages++;
+        var node = document.getElementById("marriages_container");
+        node.insertAdjacentHTML("beforeend", `<h3>Marriage ${num_marriages}</h3>
+            <fieldset>
+                <legend>Marriage</legend>
+                <p>
+                    <label for="marriage_order_m${num_marriages}">Marriage order:</label>
+                    <input type="number" id="marriage_order_m${num_marriages}" name="marriage_order_m${num_marriages}" value="${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="married_month_m${num_marriages}">Marriage date:</label>
+                    <select id="married_month_m${num_marriages}" name="married_month_m${num_marriages}">
+                        <option value="">--</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                    <input type="text" id="married_day_m${num_marriages}" name="married_day_m${num_marriages}" placeholder="Day" />
+                    <input type="text" id="married_year_m${num_marriages}" name="married_year_m${num_marriages}" placeholder="Year" />
+                </p>
+
+                <p>
+                    <label for="married_place_m${num_marriages}">Marriage place:</label>
+                    <input type="text" class="long_input" id="married_place_m${num_marriages}" name="married_place_m${num_marriages}" />
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Divorce</legend>
+                <p>
+                    <label for="divorced_m${num_marriages}">Divorced:</label>
+                    <input type="checkbox" id="divorced_m${num_marriages}" name="divorced_m${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="divorced_month_m${num_marriages}">Divorce date:</label>
+                    <select id="divorced_month_m${num_marriages}" name="divorced_month_m${num_marriages}">
+                        <option value="">--</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                    <input type="text" id="divorced_day_m${num_marriages}" name="divorced_day_m${num_marriages}" placeholder="Day" />
+                    <input type="text" id="divorced_year_m${num_marriages}" name="divorced_year_m${num_marriages}" placeholder="Year" />
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <p>
+                    <legend>Spouse ${num_marriages} Identifiers</legend>
+                    <label for="id_s${num_marriages}">ID:</label>
+                    <input type="text" id="id_s${num_marriages}" name="id_s${num_marriages}" required />
+                </p>
+
+                <p>
+                    <label for="print_id_s${num_marriages}">Print ID:</label>
+                    <input type="text" id="print_id_s${num_marriages}" name="print_id_s${num_marriages}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <p>
+                    <legend>Spouse ${num_marriages} Name</legend>
+                    <label for="first_name_s${num_marriages}">First name:</label>
+                    <input type="text" id="first_name_s${num_marriages}" name="first_name_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="nickname_s${num_marriages}">Nickname:</label>
+                    <input type="text" id="nickname_s${num_marriages}" name="nickname_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="middle_name1_s${num_marriages}">Middle name 1:</label>
+                    <input type="text" id="middle_name1_s${num_marriages}" name="middle_name1_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="middle_name2_s${num_marriages}">Middle name 2:</label>
+                    <input type="text" id="middle_name2_s${num_marriages}" name="middle_name2_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="last_name_s${num_marriages}">Last name:</label>
+                    <input type="text" id="last_name_s${num_marriages}" name="last_name_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="pref_name_s${num_marriages}">Preferred name:</label>
+                    <select id="pref_name_s${num_marriages}" name="pref_name_s${num_marriages}">
+                        <option value="">--</option>
+                        <option value="F">First name</option>
+                        <option value="N">Nickname</option>
+                        <option value="M1">Middle name 1</option>
+                        <option value="M2">Middle name 2</option>
+                    </select>
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse ${num_marriages} Birth</legend>
+                <p>
+                    <label for="birth_month_s${num_marriages}">Birth date:</label>
+                    <select id="birth_month_s${num_marriages}" name="birth_month_s${num_marriages}">
+                        <option value="">--</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                    <input type="text" id="birth_day_s${num_marriages}" name="birth_day_s${num_marriages}" placeholder="Day" />
+                    <input type="text" id="birth_year_s${num_marriages}" name="birth_year_s${num_marriages}" placeholder="Year" />
+                </p>
+
+                <p>
+                    <label for="birth_place_s${num_marriages}">Birth place:</label>
+                    <input type="text" class="long_input" id="birth_place_s${num_marriages}" name="birth_place_s${num_marriages}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse ${num_marriages} Death</legend>
+                <p>
+                    <label for="death_month_s${num_marriages}">Death date:</label>
+                    <select id="death_month_s${num_marriages}" name="death_month_s${num_marriages}">
+                        <option value="">--</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                    <input type="text" id="death_day_s${num_marriages}" name="death_day_s${num_marriages}" placeholder="Day" />
+                    <input type="text" id="death_year_s${num_marriages}" name="death_year_s${num_marriages}" placeholder="Year" />
+                </p>
+
+                <p>
+                    <label for="death_place_s${num_marriages}">Death place:</label>
+                    <input type="text" class="long_input" id="death_place_s${num_marriages}" name="death_place_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="buried_s${num_marriages}">Burial place:</label>
+                    <input type="text" class="long_input" id="buried_s${num_marriages}" name="buried_s${num_marriages}" />
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Spouse ${num_marriages} Miscellaneous</legend>
+                <p>
+                    <label for="in_tree_s${num_marriages}">In tree:</label>
+                    <input type="checkbox" id="in_tree_s${num_marriages}" name="in_tree_s${num_marriages}" />
+                </p>
+
+                <p>
+                    <label for="gender_s${num_marriages}">Gender:</label>
+                    <select id="gender_s${num_marriages}" name="gender_s${num_marriages}">
+                        <option value="">--</option>
+                        <option value="F">Female</option>
+                        <option value="M">Male</option>
+                        <option value="N">Non-binary</option>
+                    </select>
+                </p>
+
+                <p>
+                    <label for="additional_notes_s${num_marriages}">Additional notes:</label>
+                    <textarea id="additional_notes_s${num_marriages}" name="additional_notes_s${num_marriages}"></textarea>
+                </p>
+            </fieldset>`);
+    };
+</script>
+{% endblock %}

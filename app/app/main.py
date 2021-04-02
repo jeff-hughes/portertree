@@ -25,6 +25,7 @@ app = Flask(__name__)
 app.config.from_envvar('FLASK_SETTINGS')
 mail = Mail(app)
 login_manager = LoginManager(app)
+login_manager.login_view = "admin_login"
 
 db = DBConnect()
 
@@ -143,8 +144,8 @@ def person_page(pid):
     data["treegraph"] = json.dumps([treegraph])
 
     # special cases with extended notes about the early family members
-    if data["focal"]["id"] in EXTENDED_NOTES:
-        return render_template(f"extended/person{data['focal']['id']}.html", data=data)
+    if pid in EXTENDED_NOTES:
+        return render_template(f"extended/person{pid}.html", data=data)
     else:
         return render_template("person.html", data=data)
 
@@ -226,7 +227,7 @@ def admin_login():
                     return abort(400)
 
         return redirect(nexturl or url_for("admin_index"))
-    return render_template("admin_login.html")
+    return render_template("admin/login.html")
 
 
 @app.route('/admin/logout')
@@ -246,15 +247,101 @@ def admin_index():
         if data_path.startswith("/"):
             data_path = data_path[1:]
         data_path = request.url_root + data_path
-        return render_template("admin_index.html", exported_data=data_path)
+        return render_template("admin/index.html", exported_data=data_path)
     else:
-        return render_template("admin_index.html")
+        return render_template("admin/index.html")
 
 
-@app.route('/admin/editdata')
+@app.route('/admin/editdata', methods=['GET', 'POST'])
 @login_required
 def admin_editdata():
-    pass
+    if request.method == "POST":
+        to_update = request.form["update"] == "True"
+        focal_data = {}
+        parents_data = []
+        marriages_data = []
+        spouses_data = []
+
+        person_cols = ["id", "print_id", "in_tree", "first_name",
+            "nickname", "middle_name1", "middle_name2", "last_name",
+            "pref_name", "gender", "birth_month", "birth_day",
+            "birth_year", "birth_place", "death_month", "death_day",
+            "death_year", "death_place", "buried", "additional_notes"]
+        for col in person_cols:
+            if col == "in_tree":  # checkbox
+                focal_data["in_tree"] = True if request.form.get("in_tree") else False
+            elif request.form.get(col, "") != "":  # only add non-empty
+                focal_data[col] = request.form.get(col)
+
+        if focal_data.get("id"):
+            # get birth order based on last digit of ID
+            focal_id = focal_data.get("id")
+            digits = focal_id.split(".")
+            last_num = "".join([c for c in digits[-1] if c.isnumeric()])
+
+            parent_num = 1
+            while request.form.get(f"parent_id_p{parent_num}") is not None:
+                parents_data.append({
+                    "pid": request.form.get(f"parent_id_p{parent_num}"),
+                    "cid": focal_data.get("id"),
+                    "birth_order": int(last_num)
+                })
+                parent_num += 1
+
+            marriage_cols = ["marriage_order",
+                "married_month", "married_day", "married_year",
+                "married_place", "divorced", "divorced_month",
+                "divorced_day", "divorced_year"]
+            marriage_num = 1
+            while request.form.get(f"marriage_order_m{marriage_num}") is not None:
+                marriage = {}
+                if focal_data.get("in_tree", False):
+                    marriage["pid1"] = focal_data.get("id")
+                    marriage["pid2"] = request.form.get(f"id_s{marriage_num}")
+                else:
+                    marriage["pid2"] = focal_data.get("id")
+                    marriage["pid1"] = request.form.get(f"id_s{marriage_num}")
+
+                for col in marriage_cols:
+                    col_with_num = f"{col}_m{marriage_num}"
+                    if col == "divorced":  # checkbox
+                        marriage["divorced"] = True if request.form.get(col_with_num) else None
+                    elif col == "marriage_order":
+                        marriage["marriage_order"] = int(request.form.get(col_with_num))
+                    elif request.form.get(col_with_num, "") != "":
+                        # only add non-empty
+                        marriage[col] = request.form.get(col_with_num)
+
+                spouse = {}
+                for col in person_cols:
+                    col_with_num = f"{col}_s{marriage_num}"
+                    if col == "in_tree":  # checkbox
+                        spouse["in_tree"] = True if request.form.get(col_with_num) else False
+                    elif request.form.get(col_with_num, "") != "":
+                        # only add non-empty
+                        spouse[col] = request.form.get(col_with_num)
+
+                marriages_data.append(marriage)
+                spouses_data.append(spouse)
+                marriage_num += 1
+
+        return json.dumps({ "focal": focal_data, "marriages": marriages_data, "spouses": spouses_data })
+
+        #return render_template("admin/editdata.html")
+
+    elif len(request.args) > 0:
+        pid = request.args.get("search_id")
+        if pid is not None:
+            focal = db.get_person(pid)
+            parents = db.get_parents(pid)
+            marriages = db.get_marriages(pid, focal["in_tree"])
+            for i, m in enumerate(marriages):
+                marriages[i]["children"] = db.get_children(pid, m["spouse"]["id"])
+            return render_template("admin/editdata.html", focal=focal, parents=parents, marriages=marriages, update=True)
+        else:
+            return render_template("admin/editdata.html", focal={}, parents={}, marriages={})
+    else:
+        return render_template("admin/editdata.html", focal={}, parents={}, marriages={})
 
 
 # Helper functions ---------------------------------------------------
