@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}{% endblock %} | Porter Family Tree</title>
+        <meta name="description" content="Family tree for William Porter and Elizabeth Kenney">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+        <meta name="theme-color" content="#fafafa">
+    </head>
+    <body class="{% block body_class %}index{% endblock %}">
+        {% if self.body_class() != "admin_login" %}
+        <header>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home page</a></li>
+                <li><a href="{{ url_for('admin_index') }}">Admin home</a></li>
+                <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
+            </ul>
+        </header>
+        {% endif %}
+        <div id="main_content">{% block content %}{% endblock %}</div>
+    </body>
+</html>
