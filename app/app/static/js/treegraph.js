@@ -37,8 +37,12 @@ tree_options = {
             return text;
         },
         nodeRenderer: function(name, x, y, height, width, extra, id, nodeClass, textClass, textRenderer) {
+            focal_class = ""
+            if (textClass == "emphasis") {
+                focal_class = " node_focal"
+            }
             let node = '';
-            node += '<div class="node ' + nodeClass + '" id="node' + id + '">\n';
+            node += '<div class="node ' + nodeClass + focal_class + '" id="node' + id + '">\n';
             node += textRenderer(name, extra, textClass);
             node += '</div>';
             return node;
@@ -48,4 +52,13 @@ tree_options = {
 
 docReady(function() {
     tree = dTree.init(tree_data, tree_options);
+
+    // center graph on the focal node
+    let focal_node = document.getElementsByClassName("node_focal")[0];
+    if (focal_node !== null) {
+        let focal_id = focal_node.id;
+        focal_id = parseInt(focal_id.replace( /^\D+/g, ''));
+            // get just numeric value from ID
+        tree.zoomToNode(focal_id, 1, 0);
+    }
 });
