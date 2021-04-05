@@ -3,12 +3,18 @@ import os
 from typing import Any, Dict, List
 import psycopg2
 
-PERSON_COLS = ("id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes")
-MARRIAGE_COLS = ("pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year")
+PERSON_COLS = ["id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes"]
+MARRIAGE_COLS = ["pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year"]
+CHILDREN_COLS = ["id", "pid", "cid", "birth_order"]
 
 class DBConnect():
     def __init__(self):
-        self.conn = psycopg2.connect(f"host='{os.environ['POSTGRES_HOST']}' port='{os.environ['POSTGRES_PORT']}' dbname='{os.environ['POSTGRES_DB']}' user='{os.environ['POSTGRES_USER']}' password='{os.environ['POSTGRES_PASSWORD']}'")
+        self.conn = psycopg2.connect(
+            host=os.environ["POSTGRES_HOST"],
+            port=os.environ["POSTGRES_PORT"],
+            dbname=os.environ["POSTGRES_DB"],
+            user=os.environ["POSTGRES_USER"],
+            password=os.environ["POSTGRES_PASSWORD"])
         self.cursor = self.conn.cursor()
 
     def __del__(self):
@@ -26,6 +32,8 @@ class DBConnect():
             FROM people
             WHERE id = %s""", (pid,))
         p = self.cursor.fetchone()
+        if p is None:
+            return None
         return { k: v for k, v in zip(PERSON_COLS, p) }
 
     def get_parents(self, pid: str) -> List[Dict[str, Any]]:
@@ -35,7 +43,7 @@ class DBConnect():
                 p.middle_name1, p.middle_name2, p.last_name, p.pref_name,
                 p.gender, p.birth_month, p.birth_day, p.birth_year,
                 p.birth_place, p.death_month, p.death_day, p.death_year,
-                p.death_place, p.buried, p.additional_notes
+                p.death_place, p.buried, p.additional_notes, c.id as row_id
             FROM children c
             LEFT JOIN people p ON c.pid = p.id
             WHERE c.cid = %s""", (pid,))
@@ -43,7 +51,7 @@ class DBConnect():
 
         out = []
         for pr in parents:
-            out.append({ k: v for k, v in zip(PERSON_COLS, pr) })
+            out.append({ k: v for k, v in zip(PERSON_COLS + ["row_id"], pr) })
         return out
 
     def get_children(self, pid1: str, pid2: str) -> List[Dict[str, Any]]:
@@ -93,7 +101,7 @@ class DBConnect():
                 p.gender, p.birth_month, p.birth_day, p.birth_year,
                 p.birth_place, p.death_month, p.death_day, p.death_year,
                 p.death_place, p.buried, p.additional_notes,
-                m.pid1, m.pid2, m.marriage_order, m.married_month,
+                m.id, m.pid1, m.pid2, m.marriage_order, m.married_month,
                 m.married_day, m.married_year, m.married_place,
                 m.divorced, m.divorced_month, m.divorced_day,
                 m.divorced_year
@@ -168,6 +176,110 @@ class DBConnect():
             out.append({ k: v for k, v in zip(PERSON_COLS, p) })
         return out
 
+    def add_person(self, person: Dict[str, Any], update: bool) -> bool:
+        if "id" not in person:
+            raise KeyError("No 'id' value for Person: Cannot insert into database.")
+        if "in_tree" not in person:
+            raise KeyError("No 'in_tree' value for Person: Cannot insert null value in database.")
+
+        if update:
+            cols = [k for k in person.keys() if k in PERSON_COLS and k != "id"]
+            blanks_list = ", ".join([f"{k} = %s" for k in cols])
+            val_list = [person[k] for k in cols] + [person["id"]]
+            self.cursor.execute(f"""
+                UPDATE people
+                SET {blanks_list}
+                WHERE id = %s""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "UPDATE" and msg[1] == "1"
+        else:
+            cols = [k for k in person.keys() if k in PERSON_COLS]
+            col_list = ", ".join(cols)
+            blanks_list = ", ".join(["%s"] * len(cols))
+            val_list = [person[k] for k in cols]
+            self.cursor.execute(f"""
+                INSERT INTO people ({col_list})
+                VALUES
+                ({blanks_list})""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "INSERT" and msg[2] == "1"
+        
+        if status:
+            return True
+        else:
+            self.rollback_transaction()  # roll back transaction
+            return False
+
+    def add_child_relationship(self, relationship: Dict[str, Any], update: bool) -> bool:
+        if "pid" not in relationship:
+            raise KeyError("No 'pid' value for Child Relationship: Cannot insert into database.")
+        if "cid" not in relationship:
+            raise KeyError("No 'cid' value for Child Relationship: Cannot insert into database.")
+        if update and "id" not in relationship:
+            raise KeyError("No 'id' value for Child Relationship: Cannot update entry in database.")
+
+        if update:
+            cols = [k for k in relationship.keys() if k in CHILDREN_COLS and k != "id"]
+            blanks_list = ", ".join([f"{k} = %s" for k in cols])
+            val_list = [relationship[k] for k in cols] + [relationship["id"]]
+            self.cursor.execute(f"""
+                UPDATE children
+                SET {blanks_list}
+                WHERE id = %s""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "UPDATE" and msg[1] == "1"
+        else:
+            cols = [k for k in relationship.keys() if k in CHILDREN_COLS]
+            col_list = ", ".join(cols)
+            blanks_list = ", ".join(["%s"] * len(cols))
+            val_list = [relationship[k] for k in cols]
+            self.cursor.execute(f"""
+                INSERT INTO children ({col_list})
+                VALUES
+                ({blanks_list})""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "INSERT" and msg[2] == "1"
+        
+        if status:
+            return True
+        else:
+            self.rollback_transaction()  # roll back transaction
+            return False
+
+    def add_marriage(self, marriage: Dict[str, Any], update: bool) -> None:
+        if "pid1" not in marriage or "pid2" not in marriage:
+            raise KeyError("Must have both 'pid1' and 'pid2' values for Marriage: Cannot insert into database.")
+        if update and "id" not in marriage:
+            raise KeyError("No 'id' value for Marriage: Cannot update entry in database.")
+
+        if update:
+            cols = [k for k in marriage.keys() if k in MARRIAGE_COLS and k != "id"]
+            blanks_list = ", ".join([f"{k} = %s" for k in cols])
+            val_list = [marriage[k] for k in cols] + [marriage["id"]]
+            self.cursor.execute(f"""
+                UPDATE marriage
+                SET {blanks_list}
+                WHERE id = %s""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "UPDATE" and msg[1] == "1"
+        else:
+            cols = [k for k in marriage.keys() if k in MARRIAGE_COLS]
+            col_list = ", ".join(cols)
+            blanks_list = ", ".join(["%s"] * len(cols))
+            val_list = [marriage[k] for k in cols]
+            self.cursor.execute(f"""
+                INSERT INTO marriage ({col_list})
+                VALUES
+                ({blanks_list})""", val_list)
+            msg = self.cursor.statusmessage.split(" ")
+            status = msg[0] == "INSERT" and msg[2] == "1"
+        
+        if status:
+            return True
+        else:
+            self.rollback_transaction()  # roll back transaction
+            return False
+
     def export_data(self, table: str, file_handle: io.IOBase) -> None:
         if table == "people":
             self.cursor.copy_expert("""
@@ -190,3 +302,9 @@ class DBConnect():
                 TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
         else:
             raise ValueError
+
+    def commit_transaction(self) -> None:
+        self.conn.commit()
+
+    def rollback_transaction(self) -> None:
+        self.conn.rollback()

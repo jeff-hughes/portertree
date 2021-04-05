@@ -15,12 +15,12 @@
     </form>
 
     <form id="form_data" method="POST" action="{{ url_for('admin_editdata') }}">
-        <input type="hidden" id="update" name="update" value="{% if update %}True{% else %}False{% endif %}" />
+        <input type="hidden" id="update" name="update" value="{% if update %}{{ focal.id if focal.id }}{% endif %}" />
         <fieldset>
             <legend>Identifiers</legend>
             <p>
                 <label for="id">ID:</label>
-                <input type="text" id="id" name="id" value="{{ focal.id if focal.id }}" required />
+                <input type="text" id="id" name="id" value="{{ focal.id if focal.id }}" required{% if update %} readonly{% endif %} />
             </p>
 
             <p>
@@ -154,6 +154,7 @@
             <legend>Parents</legend>
             <div id="parents_container">
                 {% for p in parents %}
+                    <input type="hidden" id="update_p{{ loop.index }}" name="update_p{{ loop.index }}" value="{{ p.row_id }}" />
                     <p>
                         <label for="parent_id_p{{ loop.index }}">Parent {{ loop.index }} ID:</label>
                         <input type="text" id="parent_id_p{{ loop.index }}" name="parent_id_p{{ loop.index }}" value="{{ p.id if p.id }}" />
@@ -167,6 +168,7 @@
             {% for m in marriages %}
             <h3>Marriage {{ loop.index }}</h3>
             <fieldset>
+                <input type="hidden" id="update_m{{ loop.index }}" name="update_m{{ loop.index }}" value="{{ m.marriage.id }}" />
                 <legend>Marriage</legend>
                 <p>
                     <label for="marriage_order_m{{ loop.index }}">Marriage order:</label>
@@ -376,7 +378,8 @@
     document.getElementById("add_parent").onclick = function(e) {
         num_parents++;
         var node = document.getElementById("parents_container");
-        node.insertAdjacentHTML("beforeend", `<p>
+        node.insertAdjacentHTML("beforeend", `<input type="hidden" id="update_p${num_parents}" name="update_p${num_parents}" value="" />
+        <p>
             <label for="parent_id_p${num_parents}">Parent ${num_parents} ID:</label>
             <input type="text" id="parent_id_p${num_parents}" name="parent_id_p${num_parents}" />
         </p>`);
@@ -388,6 +391,7 @@
         node.insertAdjacentHTML("beforeend", `<h3>Marriage ${num_marriages}</h3>
             <fieldset>
                 <legend>Marriage</legend>
+                <input type="hidden" id="update_m${num_marriages}" name="update_m${num_marriages}" value="" />
                 <p>
                     <label for="marriage_order_m${num_marriages}">Marriage order:</label>
                     <input type="number" id="marriage_order_m${num_marriages}" name="marriage_order_m${num_marriages}" value="${num_marriages}" />

@@ -77,6 +77,9 @@ def adv_search():
 def person_page(pid):
     data = {}
     p = db.get_person(pid)
+    if p is None:
+        abort(404)
+
     data["focal"] = format_person_data(p, emphasis=True)
 
     # get info on focal person's parents
@@ -94,15 +97,16 @@ def person_page(pid):
         data["parents"] = sorted(data["parents"], key=birthdate_sorter)
 
         # get info on focal person's siblings
-        siblings = db.get_children(parent_ids[0], parent_ids[1])
-        data["siblings"] = []
-        for i, sib in enumerate(siblings):
-            if sib["id"] == pid:
-                data["siblings"].append(data["focal"])
-                focal_birth_order = i
-            else:
-                sib_dict = format_person_data(sib)
-                data["siblings"].append(sib_dict)
+        if len(parents) == 2:
+            siblings = db.get_children(parent_ids[0], parent_ids[1])
+            data["siblings"] = []
+            for i, sib in enumerate(siblings):
+                if sib["id"] == pid:
+                    data["siblings"].append(data["focal"])
+                    focal_birth_order = i
+                else:
+                    sib_dict = format_person_data(sib)
+                    data["siblings"].append(sib_dict)
 
     # get info on focal person's spouse(s)
     data["marriages"] = []
@@ -128,7 +132,7 @@ def person_page(pid):
     # if focal person's parents aren't in the database, we have to
     # adjust the graphical tree properly since their data isn't nested
     # under their parents
-    if len(parents) == 0:
+    if len(parents) != 2:
         treegraph = data["focal"]
         treegraph["marriages"] = data["marriages"]
     else:
@@ -256,12 +260,12 @@ def admin_index():
 @login_required
 def admin_editdata():
     if request.method == "POST":
-        to_update = request.form["update"] == "True"
         focal_data = {}
         parents_data = []
         marriages_data = []
         spouses_data = []
 
+        focal_update = request.form["update"] != ""
         person_cols = ["id", "print_id", "in_tree", "first_name",
             "nickname", "middle_name1", "middle_name2", "last_name",
             "pref_name", "gender", "birth_month", "birth_day",
@@ -270,7 +274,15 @@ def admin_editdata():
         for col in person_cols:
             if col == "in_tree":  # checkbox
                 focal_data["in_tree"] = True if request.form.get("in_tree") else False
-            elif request.form.get(col, "") != "":  # only add non-empty
+            elif focal_update:
+                # if updating, explicitly set null values in case we're
+                # erasing something
+                col_data = request.form.get(col, "")
+                if col_data == "":
+                    col_data = None
+                focal_data[col] = col_data
+            elif request.form.get(col, "") != "":
+                # only add non-empty values
                 focal_data[col] = request.form.get(col)
 
         if focal_data.get("id"):
@@ -281,11 +293,14 @@ def admin_editdata():
 
             parent_num = 1
             while request.form.get(f"parent_id_p{parent_num}") is not None:
-                parents_data.append({
-                    "pid": request.form.get(f"parent_id_p{parent_num}"),
-                    "cid": focal_data.get("id"),
-                    "birth_order": int(last_num)
-                })
+                parent = {}
+                update_p = request.form.get(f"update_p{parent_num}") != ""
+                if update_p:
+                    parent["id"] = request.form.get(f"update_p{parent_num}")
+                parent["pid"] = request.form.get(f"parent_id_p{parent_num}")
+                parent["cid"] = focal_data.get("id")
+                parent["birth_order"] = int(last_num)
+                parents_data.append((parent, update_p, db.add_child_relationship))
                 parent_num += 1
 
             marriage_cols = ["marriage_order",
@@ -295,6 +310,9 @@ def admin_editdata():
             marriage_num = 1
             while request.form.get(f"marriage_order_m{marriage_num}") is not None:
                 marriage = {}
+                update_m = request.form.get(f"update_m{marriage_num}") != ""
+                if update_m:
+                    marriage["id"] = request.form.get(f"update_m{marriage_num}")
                 if focal_data.get("in_tree", False):
                     marriage["pid1"] = focal_data.get("id")
                     marriage["pid2"] = request.form.get(f"id_s{marriage_num}")
@@ -308,6 +326,13 @@ def admin_editdata():
                         marriage["divorced"] = True if request.form.get(col_with_num) else None
                     elif col == "marriage_order":
                         marriage["marriage_order"] = int(request.form.get(col_with_num))
+                    elif update_m:
+                        # if updating, explicitly set null values in
+                        # case we're erasing something
+                        col_data = request.form.get(col_with_num, "")
+                        if col_data == "":
+                            col_data = None
+                        marriage[col] = col_data
                     elif request.form.get(col_with_num, "") != "":
                         # only add non-empty
                         marriage[col] = request.form.get(col_with_num)
@@ -317,31 +342,48 @@ def admin_editdata():
                     col_with_num = f"{col}_s{marriage_num}"
                     if col == "in_tree":  # checkbox
                         spouse["in_tree"] = True if request.form.get(col_with_num) else False
+                    elif update_m:
+                        # if updating, explicitly set null values in
+                        # case we're erasing something
+                        col_data = request.form.get(col_with_num, "")
+                        if col_data == "":
+                            col_data = None
+                        spouse[col] = col_data
                     elif request.form.get(col_with_num, "") != "":
                         # only add non-empty
                         spouse[col] = request.form.get(col_with_num)
 
-                marriages_data.append(marriage)
-                spouses_data.append(spouse)
+                marriages_data.append((marriage, update_m, db.add_marriage))
+                spouses_data.append((spouse, update_m, db.add_person))
                 marriage_num += 1
 
-        return json.dumps({ "focal": focal_data, "marriages": marriages_data, "spouses": spouses_data })
+        # go through all queries one at a time, but rollback transaction
+        # on failure
+        queries = [(focal_data, focal_update, db.add_person)] + spouses_data + parents_data + marriages_data
+        all_success = True
+        for data, to_update, query in queries:
+            result = query(data, to_update)
+            if not result:
+                all_success = False
+                break
 
-        #return render_template("admin/editdata.html")
+        if all_success:
+            db.commit_transaction()
+
+        # return json.dumps({ "focal": focal_data, "marriages": marriages_data, "spouses": spouses_data })
 
     elif len(request.args) > 0:
         pid = request.args.get("search_id")
         if pid is not None:
             focal = db.get_person(pid)
-            parents = db.get_parents(pid)
-            marriages = db.get_marriages(pid, focal["in_tree"])
-            for i, m in enumerate(marriages):
-                marriages[i]["children"] = db.get_children(pid, m["spouse"]["id"])
-            return render_template("admin/editdata.html", focal=focal, parents=parents, marriages=marriages, update=True)
-        else:
-            return render_template("admin/editdata.html", focal={}, parents={}, marriages={})
-    else:
-        return render_template("admin/editdata.html", focal={}, parents={}, marriages={})
+            if focal is not None:
+                parents = db.get_parents(pid)
+                marriages = db.get_marriages(pid, focal["in_tree"])
+                for i, m in enumerate(marriages):
+                    marriages[i]["children"] = db.get_children(pid, m["spouse"]["id"])
+                return render_template("admin/editdata.html", focal=focal, parents=parents, marriages=marriages, update=True)
+
+    return render_template("admin/editdata.html", focal={}, parents={}, marriages={})
 
 
 # Helper functions ---------------------------------------------------
