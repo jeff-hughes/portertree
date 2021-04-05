@@ -6,6 +6,7 @@
 
 {% block content %}
     <h2>Login</h2>
+    {% if message %}<div class="alert_message alert_{{ message_style }}">{{ message }}</div>{% endif %}
     <form method="POST" action="{{ url_for('admin_login') }}">
         <p>
             <label for="username">Username:</label>

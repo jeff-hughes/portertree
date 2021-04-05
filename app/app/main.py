@@ -220,17 +220,17 @@ def page_not_found(e):
 def admin_login():
     if request.method == "POST":
         user = User.get(request.form["username"])
-        if (user is not None):
+        if user is not None:
             pass_hash = hash_pass(request.form["password"])
-            if (user.password == pass_hash):
+            if user.password == pass_hash:
                 login_user(user)
 
                 flash("Logged in successfully.")
                 nexturl = request.args.get("next")
                 if not is_safe_url(nexturl):
                     return abort(400)
-
-        return redirect(nexturl or url_for("admin_index"))
+                return redirect(nexturl or url_for("admin_index"))
+        return render_template("admin/login.html", message="Error: Incorrect username and/or password.", message_style="error")
     return render_template("admin/login.html")
 
 
