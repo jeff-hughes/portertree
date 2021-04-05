@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import psycopg2
 
 PERSON_COLS = ["id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes"]
-MARRIAGE_COLS = ["pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year"]
+MARRIAGE_COLS = ["id", "pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year"]
 CHILDREN_COLS = ["id", "pid", "cid", "birth_order"]
 
 

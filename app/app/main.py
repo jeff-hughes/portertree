@@ -114,7 +114,7 @@ def person_page(pid):
     for m in marriages:
         marriage = m["marriage"]
 
-        marriage["marriage_date"] = format_date(marriage, "day", "month", "year")
+        marriage["marriage_date"] = format_date(marriage, "married_day", "married_month", "married_year")
         if is_attr(marriage, "divorced") and marriage["divorced"]:
             marriage["divorced_date"] = format_date(marriage, "divorced_day", "divorced_month", "divorced_year")
 
@@ -300,7 +300,7 @@ def admin_editdata():
                 parents_data.append(DBEntry(parent, DBEntryType.PARENT_CHILD_REL, update_p))
                 parent_num += 1
 
-            marriage_cols = [c for c in MARRIAGE_COLS if c not in ("pid1", "pid2")]
+            marriage_cols = [c for c in MARRIAGE_COLS if c not in ("id", "pid1", "pid2")]
             marriage_num = 1
             while request.form.get(f"marriage_order_m{marriage_num}") is not None:
                 marriage = {}
@@ -505,15 +505,15 @@ def format_date(record, day, month, year, all_blanks=False):
         if all_blanks:
             string += f"{record[month]} __"
         else:
-            string += record[month]
+            string += str(record[month])
     elif all_blanks:
         string += "_____ __"
 
     if is_attr(record, year):
         if string != "":
-            string += ", " + record[year]
+            string += ", " + str(record[year])
         else:
-            string += record[year]
+            string += str(record[year])
     elif all_blanks:
         string += ", ____"
 
