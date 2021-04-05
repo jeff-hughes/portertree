@@ -319,7 +319,7 @@ class DBConnect():
             blanks_list = ", ".join([f"{k} = %s" for k in cols])
             val_list = [marriage[k] for k in cols] + [marriage["id"]]
             self.cursor.execute(f"""
-                UPDATE marriage
+                UPDATE marriages
                 SET {blanks_list}
                 WHERE id = %s""", val_list)
             msg = self.cursor.statusmessage.split(" ")
@@ -330,7 +330,7 @@ class DBConnect():
             blanks_list = ", ".join(["%s"] * len(cols))
             val_list = [marriage[k] for k in cols]
             self.cursor.execute(f"""
-                INSERT INTO marriage ({col_list})
+                INSERT INTO marriages ({col_list})
                 VALUES
                 ({blanks_list})""", val_list)
             msg = self.cursor.statusmessage.split(" ")
