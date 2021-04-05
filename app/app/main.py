@@ -10,7 +10,7 @@ from flask_login import current_user, LoginManager, login_required, login_user, 
 from flask_mailman import Mail, EmailMessage
 
 from auth import User, hash_pass
-from db import DBConnect
+from db import DBConnect, DBEntry, DBEntryType, PERSON_COLS, MARRIAGE_COLS
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
@@ -260,34 +260,31 @@ def admin_index():
 @login_required
 def admin_editdata():
     if request.method == "POST":
-        focal_data = {}
+        focal = {}
+        focal_data = None
         parents_data = []
         marriages_data = []
         spouses_data = []
 
         focal_update = request.form["update"] != ""
-        person_cols = ["id", "print_id", "in_tree", "first_name",
-            "nickname", "middle_name1", "middle_name2", "last_name",
-            "pref_name", "gender", "birth_month", "birth_day",
-            "birth_year", "birth_place", "death_month", "death_day",
-            "death_year", "death_place", "buried", "additional_notes"]
-        for col in person_cols:
+        for col in PERSON_COLS:
             if col == "in_tree":  # checkbox
-                focal_data["in_tree"] = True if request.form.get("in_tree") else False
+                focal["in_tree"] = True if request.form.get("in_tree") else False
             elif focal_update:
                 # if updating, explicitly set null values in case we're
                 # erasing something
                 col_data = request.form.get(col, "")
                 if col_data == "":
                     col_data = None
-                focal_data[col] = col_data
+                focal[col] = col_data
             elif request.form.get(col, "") != "":
                 # only add non-empty values
-                focal_data[col] = request.form.get(col)
+                focal[col] = request.form.get(col)
+        focal_data = DBEntry(focal, DBEntryType.PERSON, focal_update)
 
-        if focal_data.get("id"):
+        if focal.get("id"):
             # get birth order based on last digit of ID
-            focal_id = focal_data.get("id")
+            focal_id = focal.get("id")
             digits = focal_id.split(".")
             last_num = "".join([c for c in digits[-1] if c.isnumeric()])
 
@@ -298,26 +295,24 @@ def admin_editdata():
                 if update_p:
                     parent["id"] = request.form.get(f"update_p{parent_num}")
                 parent["pid"] = request.form.get(f"parent_id_p{parent_num}")
-                parent["cid"] = focal_data.get("id")
+                parent["cid"] = focal.get("id")
                 parent["birth_order"] = int(last_num)
-                parents_data.append((parent, update_p, db.add_child_relationship))
+                parents_data.append(DBEntry(parent, DBEntryType.PARENT_CHILD_REL, update_p))
                 parent_num += 1
 
-            marriage_cols = ["marriage_order",
-                "married_month", "married_day", "married_year",
-                "married_place", "divorced", "divorced_month",
-                "divorced_day", "divorced_year"]
+            marriage_cols = [c for c in MARRIAGE_COLS if c not in ("pid1", "pid2")]
             marriage_num = 1
             while request.form.get(f"marriage_order_m{marriage_num}") is not None:
                 marriage = {}
                 update_m = request.form.get(f"update_m{marriage_num}") != ""
                 if update_m:
                     marriage["id"] = request.form.get(f"update_m{marriage_num}")
-                if focal_data.get("in_tree", False):
-                    marriage["pid1"] = focal_data.get("id")
+
+                if focal.get("in_tree", False):
+                    marriage["pid1"] = focal.get("id")
                     marriage["pid2"] = request.form.get(f"id_s{marriage_num}")
                 else:
-                    marriage["pid2"] = focal_data.get("id")
+                    marriage["pid2"] = focal.get("id")
                     marriage["pid1"] = request.form.get(f"id_s{marriage_num}")
 
                 for col in marriage_cols:
@@ -338,7 +333,7 @@ def admin_editdata():
                         marriage[col] = request.form.get(col_with_num)
 
                 spouse = {}
-                for col in person_cols:
+                for col in PERSON_COLS:
                     col_with_num = f"{col}_s{marriage_num}"
                     if col == "in_tree":  # checkbox
                         spouse["in_tree"] = True if request.form.get(col_with_num) else False
@@ -353,22 +348,14 @@ def admin_editdata():
                         # only add non-empty
                         spouse[col] = request.form.get(col_with_num)
 
-                marriages_data.append((marriage, update_m, db.add_marriage))
-                spouses_data.append((spouse, update_m, db.add_person))
+                marriages_data.append(DBEntry(marriage, DBEntryType.MARRIAGE, update_m))
+                spouses_data.append(DBEntry(spouse, DBEntryType.PERSON, update_m))
                 marriage_num += 1
 
         # go through all queries one at a time, but rollback transaction
         # on failure
-        queries = [(focal_data, focal_update, db.add_person)] + spouses_data + parents_data + marriages_data
-        all_success = True
-        for data, to_update, query in queries:
-            result = query(data, to_update)
-            if not result:
-                all_success = False
-                break
-
-        if all_success:
-            db.commit_transaction()
+        queries = [focal_data] + spouses_data + parents_data + marriages_data
+        db.run_transaction(queries)
 
         # return json.dumps({ "focal": focal_data, "marriages": marriages_data, "spouses": spouses_data })
 

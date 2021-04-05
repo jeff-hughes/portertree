@@ -1,3 +1,4 @@
+from enum import Enum
 import io
 import os
 from typing import Any, Dict, List
@@ -6,6 +7,53 @@ import psycopg2
 PERSON_COLS = ["id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes"]
 MARRIAGE_COLS = ["pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year"]
 CHILDREN_COLS = ["id", "pid", "cid", "birth_order"]
+
+
+class DBEntryType(Enum):
+    # people must be added to the database first so the foreign keys
+    # exist; so the value for DBEntryType.PERSON must be the lowest
+    # number
+    PERSON = 1
+    MARRIAGE = 2
+    PARENT_CHILD_REL = 3
+
+
+class DBEntry:
+    def __init__(self, data: Dict[str, Any], entry_type: DBEntryType, update: bool) -> None:
+        self.type = entry_type
+        self.update = update
+        if entry_type is DBEntryType.PERSON:
+            if "id" not in data:
+                raise KeyError("No 'id' value for Person: Cannot insert into database.")
+            if "in_tree" not in data:
+                raise KeyError("No 'in_tree' value for Person: Cannot insert null value in database.")
+            self.data = { k: v for k, v in data.items() if k in PERSON_COLS }
+
+        elif entry_type is DBEntryType.MARRIAGE:
+            if "pid1" not in data or "pid2" not in data:
+                raise KeyError("Must have both 'pid1' and 'pid2' values for Marriage: Cannot insert into database.")
+            if update and "id" not in data:
+                raise KeyError("No 'id' value for Marriage: Cannot update entry in database.")
+            self.data = { k: v for k, v in data.items() if k in MARRIAGE_COLS }
+
+        elif entry_type is DBEntryType.PARENT_CHILD_REL:
+            if "pid" not in data:
+                raise KeyError("No 'pid' value for Parent-Child Relationship: Cannot insert into database.")
+            if "cid" not in data:
+                raise KeyError("No 'cid' value for Parent-Child Relationship: Cannot insert into database.")
+            if update and "id" not in data:
+                raise KeyError("No 'id' value for Parent-Child Relationship: Cannot update entry in database.")
+            self.data = { k: v for k, v in data.items() if k in CHILDREN_COLS }
+
+        else:
+            raise KeyError("Unknown DB entry type")
+
+    def __lt__(self, other: DBEntryType) -> bool:
+        # people must be added to the database first so the foreign keys
+        # exist; so this relies on the enum value for DBEntryType.PERSON
+        # being the lowest number
+        return self.type.value < other.type.value
+
 
 class DBConnect():
     def __init__(self):
@@ -176,6 +224,30 @@ class DBConnect():
             out.append({ k: v for k, v in zip(PERSON_COLS, p) })
         return out
 
+    def run_transaction(self, data: List[DBEntry]) -> bool:
+        query_map = {
+            DBEntryType.PERSON: self.add_person,
+            DBEntryType.PARENT_CHILD_REL: self.add_child_relationship,
+            DBEntryType.MARRIAGE: self.add_marriage
+        }
+
+        # sort queries so that People are added before other queries, and
+        # foreign keys exist
+        queries = sorted(data)
+
+        all_success = True
+        for entry in queries:
+            result = query_map[entry.type](entry.data, entry.update)
+            if not result:
+                all_success = False
+                break
+
+        if all_success:
+            self.commit_transaction()
+        else:
+            self.rollback_transaction()
+        return all_success
+
     def add_person(self, person: Dict[str, Any], update: bool) -> bool:
         if "id" not in person:
             raise KeyError("No 'id' value for Person: Cannot insert into database.")
@@ -203,12 +275,7 @@ class DBConnect():
                 ({blanks_list})""", val_list)
             msg = self.cursor.statusmessage.split(" ")
             status = msg[0] == "INSERT" and msg[2] == "1"
-        
-        if status:
-            return True
-        else:
-            self.rollback_transaction()  # roll back transaction
-            return False
+        return status
 
     def add_child_relationship(self, relationship: Dict[str, Any], update: bool) -> bool:
         if "pid" not in relationship:
@@ -239,12 +306,7 @@ class DBConnect():
                 ({blanks_list})""", val_list)
             msg = self.cursor.statusmessage.split(" ")
             status = msg[0] == "INSERT" and msg[2] == "1"
-        
-        if status:
-            return True
-        else:
-            self.rollback_transaction()  # roll back transaction
-            return False
+        return status
 
     def add_marriage(self, marriage: Dict[str, Any], update: bool) -> None:
         if "pid1" not in marriage or "pid2" not in marriage:
@@ -273,12 +335,7 @@ class DBConnect():
                 ({blanks_list})""", val_list)
             msg = self.cursor.statusmessage.split(" ")
             status = msg[0] == "INSERT" and msg[2] == "1"
-        
-        if status:
-            return True
-        else:
-            self.rollback_transaction()  # roll back transaction
-            return False
+        return status
 
     def export_data(self, table: str, file_handle: io.IOBase) -> None:
         if table == "people":
