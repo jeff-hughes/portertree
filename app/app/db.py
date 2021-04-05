@@ -133,17 +133,9 @@ class DBConnect():
             out.append({ k: v for k, v in zip(PERSON_COLS, c) })
         return out
 
-    def get_marriages(self, pid: str, in_tree: bool) -> List[Dict[str, Any]]:
-        # the person "in tree" (i.e. related by blood) will always be
-        # the first one listed, pid1
-        if in_tree:
-            matchid = "pid1"
-            joinid = "pid2"
-        else:
-            matchid = "pid2"
-            joinid = "pid1"
+    def get_marriages(self, pid: str) -> List[Dict[str, Any]]:
         self.cursor.execute(f"""
-            SELECT
+            (SELECT
                 p.id, p.print_id, p.in_tree, p.first_name, p.nickname,
                 p.middle_name1, p.middle_name2, p.last_name, p.pref_name,
                 p.gender, p.birth_month, p.birth_day, p.birth_year,
@@ -154,9 +146,23 @@ class DBConnect():
                 m.divorced, m.divorced_month, m.divorced_day,
                 m.divorced_year
             FROM marriages m
-            LEFT JOIN people p ON m.{joinid} = p.id
-            WHERE m.{matchid} = %s
-            ORDER BY m.marriage_order""", (pid,))
+            LEFT JOIN people p ON m.pid2 = p.id
+            WHERE m.pid1 = %s)
+            UNION
+            (SELECT
+                p.id, p.print_id, p.in_tree, p.first_name, p.nickname,
+                p.middle_name1, p.middle_name2, p.last_name, p.pref_name,
+                p.gender, p.birth_month, p.birth_day, p.birth_year,
+                p.birth_place, p.death_month, p.death_day, p.death_year,
+                p.death_place, p.buried, p.additional_notes,
+                m.id, m.pid1, m.pid2, m.marriage_order, m.married_month,
+                m.married_day, m.married_year, m.married_place,
+                m.divorced, m.divorced_month, m.divorced_day,
+                m.divorced_year
+            FROM marriages m
+            LEFT JOIN people p ON m.pid1 = p.id
+            WHERE m.pid2 = %s)
+            ORDER BY marriage_order""", (pid, pid))
         spouses = self.cursor.fetchall()
 
         out = []

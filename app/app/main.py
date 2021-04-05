@@ -110,7 +110,7 @@ def person_page(pid):
 
     # get info on focal person's spouse(s)
     data["marriages"] = []
-    marriages = db.get_marriages(pid, p["in_tree"])
+    marriages = db.get_marriages(pid)
     for m in marriages:
         marriage = m["marriage"]
 
@@ -365,7 +365,7 @@ def admin_editdata():
             focal = db.get_person(pid)
             if focal is not None:
                 parents = db.get_parents(pid)
-                marriages = db.get_marriages(pid, focal["in_tree"])
+                marriages = db.get_marriages(pid)
                 for i, m in enumerate(marriages):
                     marriages[i]["children"] = db.get_children(pid, m["spouse"]["id"])
                 return render_template("admin/editdata.html", focal=focal, parents=parents, marriages=marriages, update=True)
