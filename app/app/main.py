@@ -32,17 +32,10 @@ db = DBConnect()
 
 @app.route('/')
 def index():
-    raw_data_file = None
-    try:
-        files = os.listdir(os.path.join(APP_ROOT, "static/data"))
-        files = [f for f in files if f.endswith(".zip")]
-        if len(files) > 0:
-            files = sorted(files)
-            raw_data_file = "data/" + files[-1]
-        else:
-            raw_data_file = "data/" + export_data()
-    except FileNotFoundError:
-        raw_data_file = "data/" + export_data()
+    raw_data_file = get_latest_export()
+    if raw_data_file is None:
+        raw_data_file = export_data()
+    raw_data_file = "data/" + raw_data_file
     return render_template("index.html", raw_data=raw_data_file)
 
 
@@ -207,6 +200,15 @@ def report():
     else:
         return render_template("report.html", url=request.args.get("url", ""))
 
+@app.route('/last-export-date')
+def last_export():
+    raw_data_file = get_latest_export()
+    if raw_data_file is None:
+        raw_data_file = export_data()
+
+    no_ext = raw_data_file.split(".")[0]
+    date = no_ext.split("_")[1]
+    return date
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -520,6 +522,18 @@ def format_date(record, day, month, year, all_blanks=False):
     if string == "":
         string = None
     return string
+
+def get_latest_export():
+    try:
+        files = os.listdir(os.path.join(APP_ROOT, "static/data"))
+        files = [f for f in files if f.endswith(".zip")]
+        if len(files) > 0:
+            files = sorted(files)
+            return files[-1]
+        else:
+            return None
+    except FileNotFoundError:
+        return None
 
 def export_data():
     date = datetime.now().strftime("%Y%m%d")
