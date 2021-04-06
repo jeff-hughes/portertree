@@ -32,6 +32,7 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 COPY ./app /app
+RUN chown -R uwsgi:uwsgi /app
 WORKDIR /app
 
 # Run the start script provided by the parent image tiangolo/uwsgi-nginx.
