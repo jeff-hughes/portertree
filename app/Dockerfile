@@ -21,6 +21,10 @@ FROM base as prod
 
 COPY nginx.tmpl /nginx.tmpl
 
+# Fix error with supervisord getting confused about nginx already
+# running: see https://stackoverflow.com/questions/33650820/nginx-emerg-bind-to-0-0-0-080-failed-98-address-already-in-use-on-docke
+RUN sed -i 's#command=/usr/sbin/nginx#command=/usr/sbin/nginx -g "daemon off;"#'  /etc/supervisor.d/supervisord.ini
+
 # Copy the entrypoint that will generate Nginx additional configs
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
