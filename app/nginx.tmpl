@@ -9,6 +9,7 @@ server {
     }
 
     location / {
+        # redirect www to non-www and http to https
         rewrite ^ https://$host$request_uri? permanent;
     }
 }
@@ -60,12 +61,4 @@ server {
     location /static {
         alias /app/static;
     }
-}
-
-# redirect www to non-www
-server {
-    listen 80;
-    listen [::]:80 ipv6only=on;
-    server_name www.{{DOMAIN}};
-    return 301 https://{{DOMAIN}}$request_uri;
 }
