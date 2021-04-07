@@ -14,6 +14,7 @@ services:
       - certbot-var:/var/lib/letsencrypt
       - webroot:/var/www/html
       - dhparam:/etc/ssl/certs
+      - /var/log/nginx:/var/log/nginx
 
   certbot:
     image: certbot/certbot
