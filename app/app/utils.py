@@ -58,7 +58,12 @@ def format_person_data(record, emphasis=False):
     output["life_span"] = create_life_span(record)
 
     output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
-    if is_attr(output, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (CURR_YEAR-100):
+    if ((not is_attr(record, "death_place")
+            and not is_attr(record, "buried"))
+        and is_attr(record, "birth_year")
+        and record["birth_year"].isnumeric()
+        and int(record["birth_year"]) >= (CURR_YEAR-100)):
+
         output["death_date"] = format_date(record, "death_day", "death_month", "death_year")
         # assume the best if someone is less than 100 years old :)
     else:
@@ -123,7 +128,15 @@ def create_life_span(record):
 
     if is_attr(record, "death_year"):
         string += f" - {record['death_year']})"
-    elif is_attr(record, "birth_year") and record["birth_year"].isnumeric() and int(record["birth_year"]) >= (CURR_YEAR-100):
+    elif ((not is_attr(record, "death_month")
+            and not is_attr(record, "death_day")
+            and not is_attr(record, "death_year")
+            and not is_attr(record, "death_place")
+            and not is_attr(record, "buried"))
+        and is_attr(record, "birth_year")
+        and record["birth_year"].isnumeric()
+        and int(record["birth_year"]) >= (CURR_YEAR-100)):
+
         string += " - present)"
         # assume the best if someone is less than 100 years old :)
     else:
