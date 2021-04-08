@@ -158,6 +158,9 @@
                     <p>
                         <label for="parent_id_p{{ loop.index }}">Parent {{ loop.index }} ID:</label>
                         <input type="text" id="parent_id_p{{ loop.index }}" name="parent_id_p{{ loop.index }}" value="{{ p.id if p.id }}" />
+
+                        <label for="parent_adoptive_p{{ loop.index }}" style="padding-left: 1em">Adoptive:</label>
+                        <input type="checkbox" id="parent_adoptive_p{{ loop.index }}" name="parent_adoptive_p{{ loop.index }}"{% if p.adoptive %} checked{% endif %} />
                     </p>
                 {% endfor %}
             </div>
@@ -200,6 +203,10 @@
                     <label for="married_place_m{{ loop.index }}">Marriage place:</label>
                     <input type="text" class="long_input" id="married_place_m{{ loop.index }}" name="married_place_m{{ loop.index }}" value="{{ m.marriage.married_place if m.marriage.married_place }}" />
                 </p>
+                <p>
+                    <label for="common_law_m{{ loop.index }}">Common-law:</label>
+                    <input type="checkbox" id="common_law_m{{ loop.index }}" name="common_law_m{{ loop.index }}"{% if m.marriage.common_law %} checked{% endif %} />
+                </p> 
             </fieldset>
 
             <fieldset>
@@ -382,6 +389,9 @@
         <p>
             <label for="parent_id_p${num_parents}">Parent ${num_parents} ID:</label>
             <input type="text" id="parent_id_p${num_parents}" name="parent_id_p${num_parents}" />
+
+            <label for="parent_adoptive_p${num_parents}" style="padding-left: 1em">Adoptive:</label>
+            <input type="checkbox" id="parent_adoptive_p${num_parents}" name="parent_adoptive_p${num_parents}" />
         </p>`);
     };
 
@@ -422,6 +432,10 @@
                     <label for="married_place_m${num_marriages}">Marriage place:</label>
                     <input type="text" class="long_input" id="married_place_m${num_marriages}" name="married_place_m${num_marriages}" />
                 </p>
+                <p>
+                    <label for="common_law_m${num_marriages}">Common-law:</label>
+                    <input type="checkbox" id="common_law_m${num_marriages}" name="common_law_m${num_marriages}" />
+                </p> 
             </fieldset>
 
             <fieldset>

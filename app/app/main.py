@@ -69,6 +69,8 @@ def person_page(pid):
 
     # get info on focal person's parents
     data["parents"] = []
+    bio_parent_ids = []
+    adopt_parent_ids = []
     parent_ids = []
     parents = db.get_parents(pid)
 
@@ -76,13 +78,25 @@ def person_page(pid):
         focal_birth_order = None
         for pr in parents:
             pr_dict = utils.format_person_data(pr)
-            parent_ids.append(pr_dict["id"])
+            if pr["adoptive"]:
+                adopt_parent_ids.append(pr_dict["id"])
+            else:
+                bio_parent_ids.append(pr_dict["id"])
             data["parents"].append(pr_dict)
 
         data["parents"] = sorted(data["parents"], key=utils.birthdate_sorter)
 
+        # there are a few cases in the data where we have two biological
+        # parents listed, plus an adoptive parent, and the graphical tree
+        # in particular just doesn't handle more than two parents very
+        # well...
+        if len(adopt_parent_ids) > 0 and len(bio_parent_ids) < 2:
+            parent_ids = bio_parent_ids + adopt_parent_ids
+        else:
+            parent_ids = bio_parent_ids
+
         # get info on focal person's siblings
-        if len(parents) == 2:
+        if len(parent_ids) == 2:
             siblings = db.get_children(parent_ids[0], parent_ids[1])
             data["siblings"] = []
             for i, sib in enumerate(siblings):
@@ -117,9 +131,16 @@ def person_page(pid):
     # if focal person's parents aren't in the database, we have to
     # adjust the graphical tree properly since their data isn't nested
     # under their parents
-    if len(parents) != 2:
+    if len(parent_ids) != 2:
         treegraph = data["focal"]
         treegraph["marriages"] = data["marriages"]
+    elif len(parents) > 2:
+        # special case of biological and adoptive parents
+        tree_parents = [p for p in data["parents"] if p["id"] in parent_ids]
+        treegraph = tree_parents[0]
+        treegraph["marriages"] = [{}]
+        treegraph["marriages"][0]["spouse"] = tree_parents[1]
+        treegraph["marriages"][0]["children"] = data["siblings"]
     else:
         treegraph = data["parents"][0]
         treegraph["marriages"] = [{}]
@@ -291,6 +312,7 @@ def admin_editdata():
                 parent["pid"] = request.form.get(f"parent_id_p{parent_num}")
                 parent["cid"] = focal.get("id")
                 parent["birth_order"] = int(last_num)
+                parent["adoptive"] = request.form.get(f"parent_adoptive_p{parent_num}")
                 parents_data.append(DBEntry(parent, DBEntryType.PARENT_CHILD_REL, update_p))
                 parent_num += 1
 
@@ -313,6 +335,8 @@ def admin_editdata():
                     col_with_num = f"{col}_m{marriage_num}"
                     if col == "divorced":  # checkbox
                         marriage["divorced"] = True if request.form.get(col_with_num) else None
+                    elif col == "common_law":  # checkbox
+                        marriage["common_law"] = True if request.form.get(col_with_num) else None
                     elif col == "marriage_order":
                         marriage["marriage_order"] = int(request.form.get(col_with_num))
                     elif update_m:

@@ -5,8 +5,8 @@ from typing import Any, Dict, List
 import psycopg2
 
 PERSON_COLS = ["id", "print_id", "in_tree", "first_name", "nickname", "middle_name1", "middle_name2", "last_name", "pref_name", "gender", "birth_month", "birth_day", "birth_year", "birth_place", "death_month", "death_day", "death_year", "death_place", "buried", "additional_notes"]
-MARRIAGE_COLS = ["id", "pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "divorced", "divorced_month", "divorced_day", "divorced_year"]
-CHILDREN_COLS = ["id", "pid", "cid", "birth_order"]
+MARRIAGE_COLS = ["id", "pid1", "pid2", "marriage_order", "married_month", "married_day", "married_year", "married_place", "common_law", "divorced", "divorced_month", "divorced_day", "divorced_year"]
+CHILDREN_COLS = ["id", "pid", "cid", "birth_order", "adoptive"]
 
 
 class DBEntryType(Enum):
@@ -91,7 +91,7 @@ class DBConnect():
                 p.middle_name1, p.middle_name2, p.last_name, p.pref_name,
                 p.gender, p.birth_month, p.birth_day, p.birth_year,
                 p.birth_place, p.death_month, p.death_day, p.death_year,
-                p.death_place, p.buried, p.additional_notes, c.id as row_id
+                p.death_place, p.buried, p.additional_notes, c.adoptive, c.id as row_id
             FROM children c
             LEFT JOIN people p ON c.pid = p.id
             WHERE c.cid = %s""", (pid,))
@@ -99,7 +99,7 @@ class DBConnect():
 
         out = []
         for pr in parents:
-            out.append({ k: v for k, v in zip(PERSON_COLS + ["row_id"], pr) })
+            out.append({ k: v for k, v in zip(PERSON_COLS + ["adoptive", "row_id"], pr) })
         return out
 
     def get_children(self, pid1: str, pid2: str) -> List[Dict[str, Any]]:
@@ -130,7 +130,7 @@ class DBConnect():
 
         out = []
         for c in children:
-            out.append({ k: v for k, v in zip(PERSON_COLS, c) })
+            out.append({ k: v for k, v in zip(PERSON_COLS + ["adoptive"], c) })
         return out
 
     def get_marriages(self, pid: str) -> List[Dict[str, Any]]:
@@ -143,8 +143,8 @@ class DBConnect():
                 p.death_place, p.buried, p.additional_notes,
                 m.id, m.pid1, m.pid2, m.marriage_order, m.married_month,
                 m.married_day, m.married_year, m.married_place,
-                m.divorced, m.divorced_month, m.divorced_day,
-                m.divorced_year
+                m.common_law, m.divorced, m.divorced_month,
+                m.divorced_day, m.divorced_year
             FROM marriages m
             LEFT JOIN people p ON m.pid2 = p.id
             WHERE m.pid1 = %s)
@@ -157,8 +157,8 @@ class DBConnect():
                 p.death_place, p.buried, p.additional_notes,
                 m.id, m.pid1, m.pid2, m.marriage_order, m.married_month,
                 m.married_day, m.married_year, m.married_place,
-                m.divorced, m.divorced_month, m.divorced_day,
-                m.divorced_year
+                m.common_law, m.divorced, m.divorced_month,
+                m.divorced_day, m.divorced_year
             FROM marriages m
             LEFT JOIN people p ON m.pid1 = p.id
             WHERE m.pid2 = %s)
@@ -167,8 +167,8 @@ class DBConnect():
 
         out = []
         for s in spouses:
-            spouse = { k: v for k, v in zip(PERSON_COLS, s[:20]) }
-            marriage = { k: v for k, v in zip(MARRIAGE_COLS, s[20:]) }
+            spouse = { k: v for k, v in zip(PERSON_COLS, s[:len(PERSON_COLS)]) }
+            marriage = { k: v for k, v in zip(MARRIAGE_COLS, s[len(PERSON_COLS):]) }
             out.append({ "marriage": marriage, "spouse": spouse })
         return out
     
@@ -356,12 +356,12 @@ class DBConnect():
             self.cursor.copy_expert("""
                 COPY marriages (pid1, pid2, marriage_order,
                     married_month, married_day, married_year,
-                    married_place, divorced, divorced_month,
+                    married_place, common_law, divorced, divorced_month,
                     divorced_day, divorced_year)
                 TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
         elif table == "children":
             self.cursor.copy_expert("""
-                COPY children (pid, cid, birth_order)
+                COPY children (pid, cid, birth_order, adoptive)
                 TO STDOUT DELIMITER ',' CSV HEADER;""", file_handle)
         else:
             raise ValueError
