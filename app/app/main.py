@@ -65,7 +65,7 @@ def person_page(pid):
     if p is None:
         abort(404)
 
-    data["focal"] = utils.format_person_data(p, emphasis=True)
+    data["focal"] = utils.format_person_data(p, focal=True)
 
     # get info on focal person's parents
     data["parents"] = []

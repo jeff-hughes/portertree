@@ -55,7 +55,7 @@ def birthdate_sorter(record: Dict[str, Any]) -> Tuple[int, int, int]:
                 pass
     return (year, month, day)
 
-def format_person_data(record: Dict[str, Any], emphasis: bool = False) -> Dict[str, Any]:
+def format_person_data(record: Dict[str, Any], focal: bool = False) -> Dict[str, Any]:
     """Given a dictionary of Person data from the database, this adds
     some additional derived fields, including the formatted name and
     life span, age or age at death, and formatted birth and death dates.
@@ -63,11 +63,14 @@ def format_person_data(record: Dict[str, Any], emphasis: bool = False) -> Dict[s
     """
     output = dict(record)
     output["display_name"] = create_display_name(record)
+    if focal:
+        output["title_name"] = create_display_name(record, underline=False)
     output["life_span"] = create_life_span(record)
 
     output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
     output["deceased"] = is_deceased(record)
-    if output["deceased"]:
+
+    if focal and output["deceased"]:
         output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
 
         age_at_death, unsure = calc_age(record, deceased=True)
@@ -92,11 +95,11 @@ def format_person_data(record: Dict[str, Any], emphasis: bool = False) -> Dict[s
         output["class"] = GENDER_MAP[output["gender"]]
     output["extra"] = { "url": url_for("person_page", pid=output["id"]) }
     
-    if emphasis:
+    if focal:
         output["textClass"] = "emphasis"
     return output
 
-def create_display_name(record: Dict[str, Any]) -> str:
+def create_display_name(record: Dict[str, Any], underline: bool = True) -> str:
     """Given a Person record, formats the first, middle, and last
     names, as well as nickname if it exists, into a string formatted
     with blank lines and indication of preferred name.
@@ -111,12 +114,12 @@ def create_display_name(record: Dict[str, Any]) -> str:
     if is_attr(record, "nickname"):
         name += f" ({record['nickname']})"
     if is_attr(record, "middle_name1"):
-        if record["pref_name"] == "M1":
+        if underline and record["pref_name"] == "M1":
             name += f" <u>{record['middle_name1']}</u>"
         else:
             name += " " + record['middle_name1']
     if is_attr(record, "middle_name2"):
-        if record["pref_name"] == "M2":
+        if underline and record["pref_name"] == "M2":
             name += f" <u>{record['middle_name2']}</u>"
         else:
             name += " " + record['middle_name2']
