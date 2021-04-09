@@ -2,22 +2,25 @@ from datetime import datetime
 import os
 import shutil
 import tempfile
+from typing import Any, Dict, Optional, List, Tuple
 from urllib.parse import urlparse, urljoin
 
 from flask import request, url_for
+from db import DBConnect
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 GENDER_MAP = { "M": "man", "F": "woman" }
 CURR_YEAR = datetime.today().year
 
-def is_attr(record, attr):
+def is_attr(record: Dict[str, Any], attr: str) -> bool:
+    """Identifies if attr exists in the record, and is non-empty."""
     if attr in record and record[attr] is not None and record[attr] != "":
         return True
     else:
         return False
 
-def birthdate_sorter(record):
+def birthdate_sorter(record: Dict[str, Any]) -> Tuple[int, int, int]:
     """Function for use in sorted(), to sort birthdates in chronological
     order. Returns a tuple of (year, month, day).
     """
@@ -52,7 +55,12 @@ def birthdate_sorter(record):
                 pass
     return (year, month, day)
 
-def format_person_data(record, emphasis=False):
+def format_person_data(record: Dict[str, Any], emphasis: bool = False) -> Dict[str, Any]:
+    """Given a dictionary of Person data from the database, this adds
+    some additional derived fields, including the formatted name and
+    life span, age or age at death, and formatted birth and death dates.
+    Returns the original dict supplemented with these additional fields.
+    """
     output = dict(record)
     output["display_name"] = create_display_name(record)
     output["life_span"] = create_life_span(record)
@@ -88,7 +96,11 @@ def format_person_data(record, emphasis=False):
         output["textClass"] = "emphasis"
     return output
 
-def create_display_name(record):
+def create_display_name(record: Dict[str, Any]) -> str:
+    """Given a Person record, formats the first, middle, and last
+    names, as well as nickname if it exists, into a string formatted
+    with blank lines and indication of preferred name.
+    """
     name = ""
     if is_attr(record, "first_name"):
         if record["first_name"] == "Unnamed":
@@ -114,7 +126,9 @@ def create_display_name(record):
         name += " _____"
     return name
 
-def create_short_name(record):
+def create_short_name(record: Dict[str, Any]) -> str:
+    """Given a Person record, returns a formatted string with just
+    first and last name."""
     name = ""
     if is_attr(record, "first_name"):
         if record["first_name"] == "Unnamed":
@@ -128,7 +142,9 @@ def create_short_name(record):
         name += " _____"
     return name
 
-def create_life_span(record):
+def create_life_span(record: Dict[str, Any]) -> str:
+    """Given a Person record, provides a formatted string with the
+    person's life span, e.g., "(1985 - 2003)" or "(2012 - present)"."""
     string = ""
     if is_attr(record, "birth_year"):
         string += f" ({record['birth_year']}"
@@ -143,7 +159,9 @@ def create_life_span(record):
         string += " - ?)"
     return string
 
-def is_deceased(record):
+def is_deceased(record: Dict[str, Any]) -> bool:
+    """Given a Person record, determines whether the person is likely
+    to be deceased or not, based on the information we have on hand."""
     if (is_attr(record, "death_year")
         or is_attr(record, "death_month")
         or is_attr(record, "death_day")
@@ -158,7 +176,12 @@ def is_deceased(record):
     else:
         return True
 
-def format_date(record, day, month, year, all_blanks=False):
+def format_date(record: Dict[str, Any], day: str, month: str,
+                year: str, all_blanks: bool = False) -> Optional[str]:
+    """Given a Person record and the appropriate fields to use for the
+    date (e.g., "birth_day", "death_day"), creates a string with the
+    formatted date. If all_blanks == True, an unknown date will return
+    as "_____ __, ____" rather than returning None."""
     string = ""
     if is_attr(record, day):
         if is_attr(record, month):
@@ -185,7 +208,17 @@ def format_date(record, day, month, year, all_blanks=False):
         string = None
     return string
 
-def calc_age(record, deceased=True):
+def calc_age(record: Dict[str, Any], deceased: bool = True) -> Tuple[Optional[int], Optional[int]]:
+    """Given a Person record and whether the person should be presumed
+    deceased, calculates either current age (for deceased == False) or
+    age at death (for deceased == True), provided enough information
+    about birth and death is available. In cases where the date(s) are
+    somewhat uncertain, the second value of the tuple will provide the
+    additional amount of uncertainty. For example, if we know someone's
+    birth year but not the month/day, calculating their current age could
+    be off by one year. Thus, their age might return as (33, 1) to
+    indicate that they could be either 33 or 34.
+    """
     birth_vals = { "year": None, "month": 1, "day": 1 }
     unsure_birth = False
     if is_attr(record, "birth_year"):
@@ -258,7 +291,9 @@ def calc_age(record, deceased=True):
         age = duration.days // 365
         return (age, int(unsure_birth) + int(unsure_death))
 
-def get_latest_export():
+def get_latest_export() -> Optional[str]:
+    """If the data has been exported from the database in the past,
+    returns the date of that export, formatted as `%Y%m%d`."""
     try:
         files = os.listdir(os.path.join(os.environ.get("APP_ROOT"), "static/data"))
         files = [f for f in files if f.endswith(".zip")]
@@ -270,7 +305,10 @@ def get_latest_export():
     except FileNotFoundError:
         return None
 
-def export_data(db_conn):
+def export_data(db_conn: DBConnect) -> str:
+    """Given a connection to the database, this exports the data to
+    CSV files, zips them and saves them to the <APP_ROOT>/static/data/
+    directory. Returns the name of the file (without the directory)."""
     date = datetime.now().strftime("%Y%m%d")
     tables = ["people", "marriages", "children"]
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -282,7 +320,10 @@ def export_data(db_conn):
         shutil.make_archive(os.path.join(os.environ.get("APP_ROOT"), "static/data", f"data_{date}"), "zip", tmpdir)
     return f"data_{date}.zip"
 
-def is_safe_url(target):
+def is_safe_url(target: str) -> bool:
+    """Ensures that URL redirects used with Flask-Login are safe, i.e.
+    are resolving to the same domain name. This helps to prevent
+    against phishing attacks."""
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and \
