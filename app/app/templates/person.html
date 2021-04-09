@@ -9,10 +9,10 @@
 {% block content %}
     <h2>{{ data.focal.display_name | safe }} {{ data.focal.life_span }}</h2>
     <dl>
-        <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focal.birth_date }}{% if data.focal.birth_place %}; {{ data.focal.birth_place }}{% endif %}</dd></div>
+        <div class="dl_row"><dt>Birth:</dt><dd>{{ data.focal.birth_date }}{% if data.focal.age %} (age {{ data.focal.age }}){% endif %}{% if data.focal.birth_place %}; {{ data.focal.birth_place }}{% endif %}</dd></div>
 
         {% if data.focal.death_date or data.focal.death_place %}
-            <div class="dl_row"><dt>Death:</dt><dd>{{ data.focal.death_date }}{% if data.focal.death_place %}; {{ data.focal.death_place }}{% endif %}</dd></div>
+            <div class="dl_row"><dt>Death:</dt><dd>{{ data.focal.death_date }}{% if data.focal.age_at_death %} (age {{ data.focal.age_at_death }}){% endif %}{% if data.focal.death_place %}; {{ data.focal.death_place }}{% endif %}</dd></div>
         {% endif %}
 
         {% if data.focal.buried %}<div class="dl_row"><dt>Buried:</dt><dd>{{ data.focal.buried }}</dd></div>{% endif %}

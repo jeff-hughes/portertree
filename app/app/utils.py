@@ -12,7 +12,7 @@ GENDER_MAP = { "M": "man", "F": "woman" }
 CURR_YEAR = datetime.today().year
 
 def is_attr(record, attr):
-    if attr in record and record[attr] is not None:
+    if attr in record and record[attr] is not None and record[attr] != "":
         return True
     else:
         return False
@@ -24,7 +24,7 @@ def birthdate_sorter(record):
     # in case of unknown values, 1000000 will ensure they are sorted
     # to the end
     year, month, day = (1000000, 1000000, 1000000)
-    if "birth_year" in record and record["birth_year"] is not None:
+    if is_attr(record, "birth_year"):
         try:
             # if year is integer, great
             year = int(record["birth_year"])
@@ -36,13 +36,13 @@ def birthdate_sorter(record):
             except:
                 pass
 
-    if "birth_month" in record and record["birth_month"] is not None:
+    if is_attr(record, "birth_month"):
         try:
             month = MONTHS.index(record["birth_month"]) + 1
         except:
             pass
     
-    if "birth_day" in record and record["birth_day"] is not None:
+    if is_attr(record, "birth_day"):
         try:
             day = int(record["birth_day"])
         except ValueError:
@@ -58,16 +58,25 @@ def format_person_data(record, emphasis=False):
     output["life_span"] = create_life_span(record)
 
     output["birth_date"] = format_date(record, "birth_day", "birth_month", "birth_year", all_blanks=True)
-    if ((not is_attr(record, "death_place")
-            and not is_attr(record, "buried"))
-        and is_attr(record, "birth_year")
-        and record["birth_year"].isnumeric()
-        and int(record["birth_year"]) >= (CURR_YEAR-100)):
-
-        output["death_date"] = format_date(record, "death_day", "death_month", "death_year")
-        # assume the best if someone is less than 100 years old :)
-    else:
+    output["deceased"] = is_deceased(record)
+    if output["deceased"]:
         output["death_date"] = format_date(record, "death_day", "death_month", "death_year", all_blanks=True)
+
+        age_at_death, unsure = calc_age(record, deceased=True)
+        if age_at_death is not None:
+            if unsure > 0:
+                output["age_at_death"] = f"{age_at_death}-{age_at_death+unsure}"
+            else:
+                output["age_at_death"] = str(age_at_death)
+    else:
+        output["death_date"] = format_date(record, "death_day", "death_month", "death_year")
+
+        age, unsure = calc_age(record, deceased=False)
+        if age is not None:
+            if unsure > 0:
+                output["age"] = f"{age}-{age+unsure}"
+            else:
+                output["age"] = str(age)
 
     # used in graphical tree
     output["name"] = create_short_name(record)
@@ -128,20 +137,26 @@ def create_life_span(record):
 
     if is_attr(record, "death_year"):
         string += f" - {record['death_year']})"
-    elif ((not is_attr(record, "death_month")
-            and not is_attr(record, "death_day")
-            and not is_attr(record, "death_year")
-            and not is_attr(record, "death_place")
-            and not is_attr(record, "buried"))
-        and is_attr(record, "birth_year")
-        and record["birth_year"].isnumeric()
-        and int(record["birth_year"]) >= (CURR_YEAR-100)):
-
+    elif not is_deceased(record):
         string += " - present)"
-        # assume the best if someone is less than 100 years old :)
     else:
         string += " - ?)"
     return string
+
+def is_deceased(record):
+    if (is_attr(record, "death_year")
+        or is_attr(record, "death_month")
+        or is_attr(record, "death_day")
+        or is_attr(record, "death_place")
+        or is_attr(record, "buried")):
+        return True
+    elif (is_attr(record, "birth_year")
+        and record["birth_year"].isnumeric()
+        and int(record["birth_year"]) >= (CURR_YEAR-100)):
+        # assume the best if someone is less than 100 years old :)
+        return False
+    else:
+        return True
 
 def format_date(record, day, month, year, all_blanks=False):
     string = ""
@@ -169,6 +184,79 @@ def format_date(record, day, month, year, all_blanks=False):
     if string == "":
         string = None
     return string
+
+def calc_age(record, deceased=True):
+    birth_vals = { "year": None, "month": 1, "day": 1 }
+    unsure_birth = False
+    if is_attr(record, "birth_year"):
+        try:
+            birth_vals["year"] = int(record["birth_year"])
+        except ValueError:
+            try:
+                birth_vals["year"] = int(record["birth_year"][0:4])
+            except:
+                # if we can't figure out birth year, no point in continuing
+                return None, None
+    else:
+        return None, None
+
+    if is_attr(record, "birth_month"):
+        try:
+            birth_vals["month"] = MONTHS.index(record["birth_month"]) + 1
+        except:
+            unsure_birth = True
+    
+    if is_attr(record, "birth_day"):
+        try:
+            birth_vals["day"] = int(record["birth_day"])
+        except ValueError:
+            try:
+                birth_vals["day"] = int(record["birth_day"][0:2])
+            except:
+                unsure_birth = True
+
+    birth_date = datetime(**birth_vals)
+
+    if not deceased:
+        today = datetime.today()
+        duration = today - birth_date
+        age = duration.days // 365
+        return (age, int(unsure_birth))
+
+    else:
+        death_vals = { "year": None, "month": 1, "day": 1 }
+        unsure_death = False
+        if is_attr(record, "death_year"):
+            try:
+                death_vals["year"] = int(record["death_year"])
+            except ValueError:
+                try:
+                    death_vals["year"] = int(record["death_year"][0:4])
+                except:
+                    # if we can't figure out death year, no point in continuing
+                    return None, None
+        else:
+            return None, None
+
+        if is_attr(record, "death_month"):
+            try:
+                death_vals["month"] = MONTHS.index(record["death_month"]) + 1
+            except:
+                unsure_death = True
+        
+        if is_attr(record, "death_day"):
+            try:
+                death_vals["day"] = int(record["death_day"])
+            except ValueError:
+                try:
+                    death_vals["day"] = int(record["death_day"][0:2])
+                except:
+                    unsure_death = True
+
+        death_date = datetime(**death_vals)
+        duration = death_date - birth_date
+        age = duration.days // 365
+        return (age, int(unsure_birth) + int(unsure_death))
 
 def get_latest_export():
     try:
