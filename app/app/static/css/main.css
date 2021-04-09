@@ -199,11 +199,16 @@ body.person dt {
 
 body.person dd {
     display: table-cell;
+    padding-bottom: 15px;
 }
 
 body.person dd ul {
     list-style: none;
     padding-left: 0;
+}
+
+body.person dd ul li:first-child p:first-child {
+    margin-top: 0;
 }
 
 body.person dd .children_header {
