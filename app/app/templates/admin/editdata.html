@@ -195,7 +195,7 @@
                         <option value="November"{% if m.marriage.married_month == 'November' %} selected{% endif %}>November</option>
                         <option value="December"{% if m.marriage.married_month == 'December' %} selected{% endif %}>December</option>
                     </select>
-                    <input type="text" id="married_day_m{{ loop.index }}" name="married_day_m{{ loop.index }}" placeholder="Day" value="{{ m.marriage.marriage_day if m.marriage.marriage_day }}" />
+                    <input type="text" id="married_day_m{{ loop.index }}" name="married_day_m{{ loop.index }}" placeholder="Day" value="{{ m.marriage.married_day if m.marriage.married_day }}" />
                     <input type="text" id="married_year_m{{ loop.index }}" name="married_year_m{{ loop.index }}" placeholder="Year" value="{{ m.marriage.married_year if m.marriage.married_year }}" />
                 </p>
 
