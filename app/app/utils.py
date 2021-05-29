@@ -131,14 +131,25 @@ def create_display_name(record: Dict[str, Any], underline: bool = True) -> str:
 
 def create_short_name(record: Dict[str, Any]) -> str:
     """Given a Person record, returns a formatted string with just
-    first and last name."""
+    preferred name and last name."""
+    pref_name = "F"
+    if is_attr(record, "pref_name"):
+        pref_name = record["pref_name"].strip()
+
     name = ""
-    if is_attr(record, "first_name"):
+    if pref_name == "N" and is_attr(record, "nickname"):
+        name += record["nickname"]
+    elif pref_name == "M1" and is_attr(record, "middle_name1"):
+        name += record["middle_name1"]
+    elif pref_name == "M2" and is_attr(record, "middle_name2"):
+        name += record["middle_name2"]
+    elif is_attr(record, "first_name"):
         if record["first_name"] == "Unnamed":
             return record["first_name"]
         name += record["first_name"]
     else:
         name += "_____"
+
     if is_attr(record, "last_name"):
         name += " " + record["last_name"]
     else:
