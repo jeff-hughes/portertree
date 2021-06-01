@@ -38,7 +38,7 @@
                 <ul>
                 {% for m in data.marriages %} 
                     <li>
-                        <p>Married {% if m.marriage_date %}{{ m.marriage_date }},{% endif %}{% if m.place %} in {{ m.place }},{% endif %} to <a href="{{ url_for('person_page', pid=m.spouse.id) }}">{{ m.spouse.display_name | safe }} {{ m.spouse.life_span }}</a>{% if m.divorced %}; Divorced{% if m.divorced_date %} {{ m.divorced_date }}{% endif %}{% endif %}</p>
+                        <p>Married {% if m.marriage_date %}{{ m.marriage_date }},{% endif %}{% if m.married_place %} in {{ m.married_place }},{% endif %} to <a href="{{ url_for('person_page', pid=m.spouse.id) }}">{{ m.spouse.display_name | safe }} {{ m.spouse.life_span }}</a>{% if m.divorced %}; Divorced{% if m.divorced_date %} {{ m.divorced_date }}{% endif %}{% endif %}</p>
                         {% if m.children | length > 0 %}
                         <h3 class="children_header">Children:</h3>
                         <ul class="children_list">
