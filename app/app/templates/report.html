@@ -6,9 +6,11 @@
 
 {% block content %}
     <h2>Report an Update/Error</h2>
-    {% if message %}<div class="alert_message alert_{{ message_style }}">{{ message }}</div>{% endif %}
     <p>
-        If you are aware of any errors with the information provided for a person, or you have updates to share (births, deaths, marriages, divorces, etc.), please use the contact form below to let me know! <strong>Please be as specific as possible.</strong>
+        If you are aware of any errors with the information provided for a person, or you have updates to share (births, deaths, marriages, divorces, etc.), please email me at <a href="javascript:location='mailto:\u006a\u0065\u0066\u0066\u002e\u0068\u0075\u0067\u0068\u0065\u0073\u0040\u0067\u006d\u0061\u0069\u006c\u002e\u0063\u006f\u006d?subject=Update for Porter family tree';void 0"><script type="text/javascript">document.write('\u006a\u0065\u0066\u0066\u002e\u0068\u0075\u0067\u0068\u0065\u0073\u0040\u0067\u006d\u0061\u0069\u006c\u002e\u0063\u006f\u006d')</script></a> to let me know! <strong>Please be as specific as possible.</strong>
+    </p>
+    <p>
+        If the information is about a person <em>currently</em> in the database, please provide the URL of the person&rsquo;s page in your email.
     </p>
     <p>
         <em>Information about people:</em> First/middle/last names, nickname, preferred name (e.g., do they go by their middle name?), gender, birth date, death date, places of birth and death, where they are buried, and any additional notes of interest or clarification.
@@ -19,35 +21,4 @@
     <p>
         <em>Information about parent&ndash;child relationships:</em> All information about people (see above) for both parents and children, and birth order if dates of birth are not known. Please include adoptive parents/children as well.
     </p>
-    <form method="POST" action="{{ url_for('report') }}">
-        <fieldset>
-            <legend>Details about Error/Update</legend>
-            <p>If this information is about a person currently in the database, please provide the URL of the person&rsquo;s page.</p>
-            <p>
-                <label for="url">URL of person:</label>
-                <input type="text" id="url" name="url" value="{{ url }}" />
-            </p>
-
-            <p>
-                <label for="details">Details:</label>
-                <br />
-                <textarea id="details" name="details" required></textarea>
-            </p>
-            <p>Please be as specific and detailed as you can!</p>
-        </fieldset>
-        <fieldset>
-            <legend>Your Contact Info</legend>
-            <p>
-                <label for="name">Your name:</label>
-                <input type="text" id="name" name="name" required />
-            </p>
-
-            <p>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required />
-            </p>
-            <p><em>Note:</em> This information will <em>only</em> be used if I need to contact you for clarification about the information you have provided.</p>
-        </fieldset>
-        <button type="submit">Send</button>
-    </form>
 {% endblock %}

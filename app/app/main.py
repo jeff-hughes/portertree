@@ -185,33 +185,9 @@ def technical_details():
     return render_template("technical_details.html")
 
 
-@app.route('/report', methods=['GET', 'POST'])
+@app.route('/report')
 def report():
-    if request.method == "POST":
-        message = { "text": "", "style": "" }
-        if request.form["details"] != "" and request.form["name"] != "" and request.form["email"] != "":
-            name = request.form["name"].strip().replace("\r", "").replace("\n", "")
-            email = request.form["email"].strip().replace("\r", "").replace("\n", "")
-            msg_body = f"From: {name} ({email})\nURL: {request.form['url']}\n\n{request.form['details']}"
-            try:
-                msg = EmailMessage(
-                    subject="Update for Porter family tree",
-                    body=msg_body,
-                    to=[app.config["MAIL_TO_ADDRESS"]],
-                    reply_to=[email])
-                msg.send()
-                message["text"] = "Message sent. Thank you!"
-                message["style"] = "success"
-            except:
-                message["text"] = "Error sending message. Please try again later, or send the information directly to " + app.config["MAIL_TO_ADDRESS"]
-                message["style"] = "error"
-        else:
-            message["text"] = "One or more required fields was empty. Please fill out all form fields."
-            message["style"] = "error"
-        return render_template("report.html", message=message["text"], message_style=message["style"])
-
-    else:
-        return render_template("report.html", url=request.args.get("url", ""))
+    return render_template("report.html", url=request.args.get("url", ""))
 
 @app.route('/last-export-date')
 def last_export():

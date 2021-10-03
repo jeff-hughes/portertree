@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Report an Update/Error{% endblock %}
+
+{% block body_class %}report{% endblock %}
+
+{% block content %}
+    <h2>Report an Update/Error</h2>
+    {% if message %}<div class="alert_message alert_{{ message_style }}">{{ message }}</div>{% endif %}
+    <p>
+        If you are aware of any errors with the information provided for a person, or you have updates to share (births, deaths, marriages, divorces, etc.), please use the contact form below to let me know! <strong>Please be as specific as possible.</strong>
+    </p>
+    <p>
+        <em>Information about people:</em> First/middle/last names, nickname, preferred name (e.g., do they go by their middle name?), gender, birth date, death date, places of birth and death, where they are buried, and any additional notes of interest or clarification.
+    </p>
+    <p>
+        <em>Information about marriages/common-law relationships:</em> Marriage date, place of marriage; are they divorced, date of divorce; and order of marriages if dates are not known.
+    </p>
+    <p>
+        <em>Information about parent&ndash;child relationships:</em> All information about people (see above) for both parents and children, and birth order if dates of birth are not known. Please include adoptive parents/children as well.
+    </p>
+    <form method="POST" action="{{ url_for('report') }}">
+        <fieldset>
+            <legend>Details about Error/Update</legend>
+            <p>If this information is about a person currently in the database, please provide the URL of the person&rsquo;s page.</p>
+            <p>
+                <label for="url">URL of person:</label>
+                <input type="text" id="url" name="url" value="{{ url }}" />
+            </p>
+
+            <p>
+                <label for="details">Details:</label>
+                <br />
+                <textarea id="details" name="details" required></textarea>
+            </p>
+            <p>Please be as specific and detailed as you can!</p>
+        </fieldset>
+        <fieldset>
+            <legend>Your Contact Info</legend>
+            <p>
+                <label for="name">Your name:</label>
+                <input type="text" id="name" name="name" required />
+            </p>
+
+            <p>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required />
+            </p>
+            <p><em>Note:</em> This information will <em>only</em> be used if I need to contact you for clarification about the information you have provided.</p>
+        </fieldset>
+        <button type="submit">Send</button>
+    </form>
+{% endblock %}
