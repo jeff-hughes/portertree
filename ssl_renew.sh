@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPOSE="/usr/local/bin/docker-compose -f compose.common.yml -f compose.prod.yml"
+COMPOSE="/usr/bin/docker compose -f compose.common.yml -f compose.prod.yml"
 DOCKER="/usr/bin/docker"
 
 cd /home/jeff/portertree/
