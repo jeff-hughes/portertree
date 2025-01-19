@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx:python3.12 as base
+FROM tiangolo/uwsgi-nginx:python3.12 AS base
 
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
@@ -32,7 +32,8 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 COPY ./app /app
-# RUN chown -R uwsgi:uwsgi /app
+RUN useradd uwsgi -g uwsgi
+    && chown -R uwsgi:uwsgi /app
 WORKDIR /app
 
 # Run the start script provided by the parent image tiangolo/uwsgi-nginx.
