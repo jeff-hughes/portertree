@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urljoin
 
 from flask import abort, Flask, flash, redirect, render_template, request, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
-from flask_mailman import Mail, EmailMessage
+# from flask_mailman import Mail, EmailMessage
 
 from auth import User, hash_pass
 from db import DBConnect, DBEntry, DBEntryType, PERSON_COLS, MARRIAGE_COLS
@@ -15,7 +15,7 @@ EXTENDED_NOTES = ["1", "1.1", "1.2", "1.3", "1.5", "1.6", "1.7", "1.8"]
 
 app = Flask(__name__)
 app.config.from_envvar('FLASK_SETTINGS')
-mail = Mail(app)
+# mail = Mail(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "admin_login"
 

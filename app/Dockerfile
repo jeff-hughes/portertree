@@ -1,11 +1,11 @@
-FROM tiangolo/uwsgi-nginx:python3.8-alpine as base
+FROM tiangolo/uwsgi-nginx:python3.12 as base
 
 # Based on: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask
 
-RUN apk add --no-cache --virtual .build-deps gcc libc-dev python3-dev \
-    && apk add --no-cache openssl postgresql-dev \
-    && pip install Flask==2.3.2 Flask-Login==0.6.2 Flask-Mailman==0.3.0 psycopg2==2.8.6 \
-    && apk del .build-deps
+RUN apt-get update && apt-get install -y openssl \
+    && pip install Flask==3.1.0 Flask-Login==0.6.3 psycopg2-binary==2.9.10 \
+    && rm -rf /var/lib/apt/lists/*
+# Flask-Mailman==0.3.0  # no longer used
 
 
 # Development image
@@ -23,7 +23,7 @@ COPY nginx.tmpl /nginx.tmpl
 
 # Fix error with supervisord getting confused about nginx already
 # running: see https://stackoverflow.com/questions/33650820/nginx-emerg-bind-to-0-0-0-080-failed-98-address-already-in-use-on-docke
-RUN sed -i 's#command=/usr/sbin/nginx#command=/usr/sbin/nginx -g "daemon off;"#'  /etc/supervisor.d/supervisord.ini
+#RUN sed -i 's#command=/usr/sbin/nginx#command=/usr/sbin/nginx -g "daemon off;"#'  /etc/supervisor.d/supervisord.ini
 
 # Copy the entrypoint that will generate Nginx additional configs
 COPY entrypoint.sh /entrypoint.sh
