@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y openssl \
 
 
 # Development image
-FROM base as dev
+FROM base AS dev
 
 # For the dev image, we are just using Flask's built-in development server
 CMD ["python", "main.py"]
@@ -17,7 +17,7 @@ CMD ["python", "main.py"]
 
 
 # Production image
-FROM base as prod
+FROM base AS prod
 
 COPY nginx.tmpl /nginx.tmpl
 
@@ -32,7 +32,7 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 COPY ./app /app
-RUN chown -R uwsgi:uwsgi /app
+# RUN chown -R uwsgi:uwsgi /app
 WORKDIR /app
 
 # Run the start script provided by the parent image tiangolo/uwsgi-nginx.
