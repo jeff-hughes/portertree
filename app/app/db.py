@@ -176,6 +176,9 @@ class DBConnect():
         # case insensitive matching for each term in the query
         match_stmts = ["(first_name ILIKE %s OR nickname ILIKE %s OR middle_name1 ILIKE %s OR middle_name2 ILIKE %s OR last_name ILIKE %s)"] * len(search_terms)
         match_stmt = " AND ".join(match_stmts)
+        if len(match_stmt) == 0:
+            return []
+
         # repeat each term 5 times, once for each column to match on
         terms = [f"%{t}%" for t in search_terms for i in range(5)]
         self.cursor.execute(f"""
@@ -213,6 +216,8 @@ class DBConnect():
                     match_stmts.append(f"{col} = %s")
                     terms.append(term)
         match_stmt = " AND ".join(match_stmts)
+        if len(match_stmt) == 0:
+            return []
 
         self.cursor.execute(f"""
             SELECT
